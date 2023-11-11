@@ -33,10 +33,10 @@ OBJCOPY = $(TOOLCHAIN_PATH)$(TOOLCHAIN_PREFIX)objcopy
 CFLAGS_ARCH	=	-mabi=ilp32 -march=rv32i -D__vexriscv__ -mstrict-align
 
 #
-CFLAGS_CODEGEN	= -O0
+#CFLAGS_CODEGEN	= -O0
 # For caravel production reduce code size and amount of stack usage around function calls and
 #   set RiscV ABI minimum frame size (16 bytes) due to the limited RAM caravel has 1.5KiB.
-#CFLAGS_CODEGEN	=	-Os -fomit-frame-pointer -mpreferred-stack-boundary=4
+CFLAGS_CODEGEN	=	-Os -fomit-frame-pointer -mpreferred-stack-boundary=4
 
 CFLAGS		=	-Wall
 

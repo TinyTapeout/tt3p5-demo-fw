@@ -1,3 +1,8 @@
+.if .gasversion. >= 23800
+// Newer gas needs this option as it bumps the default RiscV ISA spec
+.option arch, +zicsr
+.endif
+
 .global main
 .global isr
 .global _start

@@ -28,9 +28,19 @@ INCDIRS = -I$(ROOTDIR)/deps $(GENDIR)
 GCC	= $(TOOLCHAIN_PATH)$(TOOLCHAIN_PREFIX)gcc
 OBJDUMP	= $(TOOLCHAIN_PATH)$(TOOLCHAIN_PREFIX)objdump
 OBJCOPY = $(TOOLCHAIN_PATH)$(TOOLCHAIN_PREFIX)objcopy
+GREP    = grep
 
+
+
+# Newer GCC/binutils 2.36+ may require use of -march=rv32i_zicsr of inline __asm__ is used with CSRs
+GCC_COMPILER_SUPPORTS_ZICSR = $(shell $(GCC) -dumpspecs 2>/dev/null | $(GREP) -i -E "^march" | $(GREP) -i -c -E "_zicsr")
+ifeq ($(GCC_COMPILER_SUPPORTS_ZICSR),0)
+ CFLAGS_MARCH = -march=rv32i
+else
+ CFLAGS_MARCH = -march=rv32i_zicsr
+endif
 # VexRiscV on Caravel
-CFLAGS_ARCH	=	-mabi=ilp32 -march=rv32i -D__vexriscv__ -mstrict-align
+CFLAGS_ARCH	=	-mabi=ilp32 $(CFLAGS_MARCH) -D__vexriscv__ -mstrict-align
 
 #
 #CFLAGS_CODEGEN	= -O0

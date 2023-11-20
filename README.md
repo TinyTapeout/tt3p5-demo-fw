@@ -6,6 +6,10 @@ https://github.com/TinyTapeout/tt123-demo-pcb
 
 For each board rev are in [binaries](binaries).
 
+# Install requirements for flasher
+
+    pip install -r requirements.txt
+
 # License
 
 [LICENSE](LICENSE)

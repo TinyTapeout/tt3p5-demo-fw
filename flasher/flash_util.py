@@ -7,8 +7,8 @@ Created on Oct 3, 2023
 import logging
 import time
 import argparse
-from caravelflash.spi_port import CaravelPassThroughSpiPort
-from caravelflash.spiflash.serialflash import SerialFlash, SerialFlashManager
+from spi_port import CaravelPassThroughSpiPort
+from spiflash.serialflash import SerialFlash, SerialFlashManager
 from pyftdi.spi import SpiController
 
 

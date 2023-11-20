@@ -5,7 +5,7 @@ TOOLCHAIN_PATH		?= /opt/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubu
 TOOLCHAIN_PREFIX	?= riscv64-unknown-elf-
 
 # This path appears to be outside this project tree, so maybe instructions here to download this tool ?
-FLASH_PATH		?= ../flasher/ft2232h
+FLASH_PATH		?= ../flasher
 
 
 ifeq ($(MAKELEVEL),0)
@@ -74,7 +74,7 @@ flash_tigard: $(PATTERN).bin
 		echo "###" 1>&2; \
 		exit 0; \
 	else \
-		PYTHONPATH=$(FLASH_PATH) python3 $(FLASH_PATH)/caravelflash/flash_util.py  --write $<; \
+		PYTHONPATH=$(FLASH_PATH) python3 $(FLASH_PATH)/flash_util.py  --write $<; \
 	fi
 
 %.elf: %.c $(ROOTDIR)/deps/sections.lds $(SRCS)

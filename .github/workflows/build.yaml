@@ -66,7 +66,7 @@ jobs:
           export TOOLCHAIN_PATH=""
           export TOOLCHAIN_PREFIX="riscv-none-elf-"
         
-          make
+          make tt02-test/demo.bin
 
       - name: Upload firmware
         uses: actions/upload-artifact@v3

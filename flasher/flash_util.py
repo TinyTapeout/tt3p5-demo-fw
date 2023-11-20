@@ -219,12 +219,8 @@ def main():
     if args.write:
         print(f"Writing {len(writeContents)} to flash starting at {args.address}")
         flashUtil.upload(writeContents, args.address)
+        print("OK!")
 
 
 if __name__ == '__main__':
     main()
-    
-    
-    
-
-

@@ -14,7 +14,7 @@ import pyftdi.ftdi
 
 log = logging.getLogger(__name__)
 
-FTDIDeviceURIDefault = 'ftdi://ftdi:2232:TG1000a9/2'
+FTDIDeviceURIDefault = 'ftdi://ftdi:2232:TG110925/2'
 class FlashUtil:
     def __init__(self):
         self._ctrl = SpiController()

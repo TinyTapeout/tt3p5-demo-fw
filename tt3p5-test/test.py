@@ -3,9 +3,6 @@ import json
 import time
 import sys
 
-x_order = [0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23]
-y_order = [0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1 ]
-
 # control
 ctrl_en     = Pin(20, Pin.OUT)
 ctrl_inc    = Pin(19, Pin.OUT)
@@ -57,7 +54,7 @@ user_in_0.value(0)
 
 def test_design_tnt_counter():
     # select design
-    enable_design(54)
+    enable_design("tt_um_test")
 
     # reset
     user_rst_n.value(0)
@@ -79,7 +76,7 @@ def test_design_tnt_counter():
 
 def test_design_loopback():
     # select design
-    enable_design(32)
+    enable_design("tt_um_loopback")
 
     # toggle user in 0 forever
     while True:
@@ -106,7 +103,7 @@ def test_design_vga():
 
 def test_design_powergate_add():
     # select design
-    enable_design(33)
+    enable_design("tt_um_power_test")
 
     # toggle user in 0 forever
     while True:
@@ -119,7 +116,7 @@ def test_design_powergate_add():
 
 def test_design_powergate_ringosc():
     # select design
-    enable_design(48)
+    enable_design("tt_um_ringosc_cnt_pfet")
 
     # toggle user in 0 forever
     while True:
@@ -127,8 +124,8 @@ def test_design_powergate_ringosc():
         print(user_out_0.value(), user_out_1.value(), user_out_2.value(), user_out_3.value())
 
 if __name__ == '__main__':
-#    test_design_tnt_counter()
+    test_design_tnt_counter()
 #    test_design_loopback()
-    test_design_vga()
+#    test_design_vga()
 #    test_design_powergate_add()
 #    test_design_powergate_ringosc()

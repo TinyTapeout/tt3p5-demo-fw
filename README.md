@@ -1,6 +1,6 @@
-# Firmware for TinyTapeout Demoboard TT01 02 and 03
+# Firmware for TinyTapeout Demoboard TT3p5
 
-https://github.com/TinyTapeout/tt123-demo-pcb
+PCB WIP
 
 # Precompiled binaries
 

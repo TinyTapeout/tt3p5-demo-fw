@@ -12,7 +12,7 @@ ifeq ($(MAKELEVEL),0)
  ifeq (deps,$(wildcard deps))
 # Top level only
 ROOTDIR			= $(CURDIR)
-SUBMODULES		= tt02-test
+SUBMODULES		= tt3p5-test
  else
 # Subdir module is toplevel
 ROOTDIR			= $(PWD)/..
@@ -76,6 +76,9 @@ flash_tigard: $(PATTERN).bin
 	else \
 		PYTHONPATH=$(FLASH_PATH) python3 $(FLASH_PATH)/flash_util.py  --write $<; \
 	fi
+
+flash_caravel: $(PATTERN).hex
+	python3 $(FLASH_PATH)/caravel_hkflash.py $<
 
 %.elf: %.c $(ROOTDIR)/deps/sections.lds $(SRCS)
 	$(GCC) $(INCDIRS) $(CFLAGS_CODEGEN) $(CFLAGS_ARCH) $(CFLAGS) -Wl,-Bstatic,-T,$(ROOTDIR)/deps/sections.lds,--strip-debug -ffreestanding -nostdlib -o $@ $(SRCS) $<

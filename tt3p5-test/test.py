@@ -23,9 +23,12 @@ def enable_design(name):
         for project in index["mux"]:
             if index["mux"][project]["macro"] == name:
                 count = int(project)
+                repo = index["mux"][project]["repo"]
+                commit = index["mux"][project]["commit"]
 
     try:
         print(f"enabling design {name} by sending {count} [0b{count:08b}] pulses")
+        print(f"design repo {repo} @ {commit}")
     except NameError:
         print(f"no such design {name}")
         sys.exit(1)
@@ -81,10 +84,10 @@ def test_design_loopback():
     # toggle user in 0 forever
     while True:
         user_in_0.value(0)
-        time.sleep_ms(100)
+        time.sleep_ms(500)
         print(user_out_0.value(), user_out_1.value(), user_out_2.value(), user_out_3.value())
         user_in_0.value(1)
-        time.sleep_ms(100)
+        time.sleep_ms(500)
         print(user_out_0.value(), user_out_1.value(), user_out_2.value(), user_out_3.value())
 
 def test_design_vga():
@@ -124,8 +127,8 @@ def test_design_powergate_ringosc():
         print(user_out_0.value(), user_out_1.value(), user_out_2.value(), user_out_3.value())
 
 if __name__ == '__main__':
-    test_design_tnt_counter()
-#    test_design_loopback()
+#    test_design_tnt_counter()
+    test_design_loopback()
 #    test_design_vga()
 #    test_design_powergate_add()
 #    test_design_powergate_ringosc()

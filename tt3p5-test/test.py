@@ -17,6 +17,15 @@ user_out_1  = Pin(9,  Pin.IN)
 user_out_2  = Pin(10, Pin.IN)
 user_out_3  = Pin(11, Pin.IN)
 
+def reset_mux():
+    # reset the controller
+    ctrl_inc.value(0)
+    ctrl_rst_n(0)
+    ctrl_en.value(0)
+    time.sleep_ms(10)
+    ctrl_rst_n(1)
+    time.sleep_ms(10)
+
 def enable_design(name):
     with open("shuttle_index.json") as fh:
         index = json.load(fh)
@@ -33,13 +42,7 @@ def enable_design(name):
         print(f"no such design {name}")
         sys.exit(1)
 
-    # reset the controller
-    ctrl_inc.value(0)
-    ctrl_rst_n(0)
-    ctrl_en.value(0)
-    time.sleep_ms(10)
-    ctrl_rst_n(1)
-    time.sleep_ms(10)
+    reset_mux()
 
     # send the number of pulses required
     for c in range(count):
@@ -50,10 +53,6 @@ def enable_design(name):
 
     ctrl_en.value(1)
 
-# init
-user_clk.value(0)
-user_rst_n.value(0)
-user_in_0.value(0)
 
 def test_design_tnt_counter():
     # select design
@@ -127,8 +126,8 @@ def test_design_powergate_ringosc():
         print(user_out_0.value(), user_out_1.value(), user_out_2.value(), user_out_3.value())
 
 if __name__ == '__main__':
-#    test_design_tnt_counter()
-    test_design_loopback()
+    test_design_tnt_counter()
+#    test_design_loopback()
 #    test_design_vga()
 #    test_design_powergate_add()
 #    test_design_powergate_ringosc()

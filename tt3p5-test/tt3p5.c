@@ -25,7 +25,17 @@
 #define CLR(PIN,N) (PIN &= ~(1<<N))
 #define GET(PIN,N) (PIN &   (1<<N))
 
-#define FW_READY    37 - 32 // mprj_datah
+// mprj_datah
+//#define FW_READY    (37 - 32)
+#define CTRL_EN     (32 - 32)
+#define CTRL_INC    (34 - 32)
+#define CTRL_RST_N  (36 - 32)
+/*
+#define CTRL_EN     (33 - 32)
+#define CTRL_INC    (35 - 32)
+#define CTRL_RST_N  (37 - 32)
+*/
+
 
 void delay(const int d)
 {
@@ -110,18 +120,21 @@ void configure_io()
     reg_mprj_io_31 =  GPIO_MODE_MGMT_STD_OUTPUT;
     // ctrl_ena:
     reg_mprj_io_32 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
-    reg_mprj_io_33 =  GPIO_MODE_USER_STD_OUTPUT;
     // ctrl_sel_inc:
     reg_mprj_io_34 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
-    reg_mprj_io_35 =  GPIO_MODE_USER_STD_OUTPUT;
     // ctrl_sel_rst_n:
     reg_mprj_io_36 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
-    // firmware ready
-    reg_mprj_io_37 =   GPIO_MODE_MGMT_STD_OUTPUT;
 
     reg_mprj_xfer = 1;
     while (reg_mprj_xfer == 1);
+    /*
+    reg_mprj_io_32 =  GPIO_MODE_MGMT_STD_OUTPUT;
+    reg_mprj_io_34 =  GPIO_MODE_MGMT_STD_OUTPUT;
+    reg_mprj_io_36 =  GPIO_MODE_MGMT_STD_OUTPUT;
+    */
+
 }
+
 
 void main()
 {
@@ -132,14 +145,38 @@ void main()
 
     configure_io();
 
-    reg_mprj_datah |= 1 << FW_READY;
+//    SET(reg_mprj_datah, FW_READY);
 
-    // could check with the LA if the design is selected.
+    reg_la0_iena = 0x0; // input enable on for LA bank 0
+    /*
+    unsigned int reg_mprj_datah_temp = 0;
 
-    reg_la0_iena = 0x0; // input enable on
-        //reg_mprj_datal = 0xAA << 24;
+    // enable design 0 by sending 54 pulses
+    CLR(reg_mprj_datah_temp, CTRL_INC);
+    CLR(reg_mprj_datah_temp, CTRL_RST_N);
+    CLR(reg_mprj_datah_temp, CTRL_EN);
+    reg_mprj_datah = reg_mprj_datah_temp;
+    delay(1000);
+    SET(reg_mprj_datah_temp, CTRL_RST_N);
+    reg_mprj_datah = reg_mprj_datah_temp;
+    delay(1000);
+    for(int i = 0; i < 54; i ++ )
+    {
+        SET(reg_mprj_datah_temp, CTRL_INC);
+        reg_mprj_datah = reg_mprj_datah_temp;
+        delay(1000);
+        CLR(reg_mprj_datah_temp, CTRL_INC);
+        reg_mprj_datah = reg_mprj_datah_temp;
+        delay(1000);
+    }
+    SET(reg_mprj_datah_temp, CTRL_EN);
+    reg_mprj_datah = reg_mprj_datah_temp;
+    delay(1000);
+    */
+
 	while(1) {
-    //    reg_mprj_datal = reg_la0_data_in << 24;
+        // check with the LA if the design is selected.
+        reg_mprj_datal = reg_la0_data_in << 24;
         reg_gpio_out = 0x0;
         delay(1000000);
         reg_gpio_out = 0x1;

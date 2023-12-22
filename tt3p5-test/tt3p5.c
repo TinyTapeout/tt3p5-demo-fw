@@ -21,56 +21,39 @@
 #include <uart.h>
 #include <uart_api.h>
 
-#define SET(PIN,N) (PIN |=  (1<<N))
-#define CLR(PIN,N) (PIN &= ~(1<<N))
-#define GET(PIN,N) (PIN &   (1<<N))
+// there is some Caravel issue happening that prevents the usual SET and CLR from working
+// a fast read followed by write results in the whole register being cleared.
+unsigned int temp;
+#define SET(PIN,N) {temp |= (1<<N); PIN = temp;}
+#define CLR(PIN,N) {temp &= ~(1<<N); PIN = temp;}
 
-// mprj_datah
-//#define FW_READY    (37 - 32)
+// uses mprj_datah so subtract 32 to map it
 #define CTRL_EN     (32 - 32)
 #define CTRL_INC    (34 - 32)
 #define CTRL_RST_N  (36 - 32)
-/*
-#define CTRL_EN     (33 - 32)
-#define CTRL_INC    (35 - 32)
-#define CTRL_RST_N  (37 - 32)
-*/
 
+// define this to allow Caravel to select the desired design
+//#define FW_SET_MUX
+// define this to show the selected design number on the uio_out pins [31:24]
+//#define DEBUG_MUX
 
 void delay(const int d)
 {
-
-    /* Configure timer for a single-shot countdown */
+    // Configure timer for a single-shot countdown */
 	reg_timer0_config = 0;
 	reg_timer0_data = d;
     reg_timer0_config = 1;
 
     // Loop, waiting for value to reach zero
-   reg_timer0_update = 1;  // latch current value
-   while (reg_timer0_value > 0) {
-           reg_timer0_update = 1;
-   }
-
+    reg_timer0_update = 1;  // latch current value
+    while (reg_timer0_value > 0) 
+    {
+        reg_timer0_update = 1;
+    }
 }
 
 void configure_io()
 {
-    /* 
-    IO Control Registers
-    | DM     | VTRIP | SLOW  | AN_POL | AN_SEL | AN_EN | MOD_SEL | INP_DIS | HOLDH | OEB_N | MGMT_EN |
-    | 3-bits | 1-bit | 1-bit | 1-bit  | 1-bit  | 1-bit | 1-bit   | 1-bit   | 1-bit | 1-bit | 1-bit   |
-
-    Output: 0000_0110_0000_1110  (0x1808) = GPIO_MODE_USER_STD_OUTPUT
-    | DM     | VTRIP | SLOW  | AN_POL | AN_SEL | AN_EN | MOD_SEL | INP_DIS | HOLDH | OEB_N | MGMT_EN |
-    | 110    | 0     | 0     | 0      | 0      | 0     | 0       | 1       | 0     | 0     | 0       |
-    
-     
-    Input: 0000_0001_0000_1111 (0x0402) = GPIO_MODE_USER_STD_INPUT_NOPULL
-    | DM     | VTRIP | SLOW  | AN_POL | AN_SEL | AN_EN | MOD_SEL | INP_DIS | HOLDH | OEB_N | MGMT_EN |
-    | 001    | 0     | 0     | 0      | 0      | 0     | 0       | 0       | 0     | 1     | 0       |
-
-    */
-
     // to fix issue on 2306
     reg_mprj_io_1 = GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_2 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
@@ -79,6 +62,7 @@ void configure_io()
 
     // user_clock2:
     reg_mprj_io_5 =   GPIO_MODE_USER_STD_OUTPUT;
+
     // pad_ui_in[9:0]:
     reg_mprj_io_6 =   GPIO_MODE_USER_STD_INPUT_NOPULL;
     reg_mprj_io_7 =   GPIO_MODE_USER_STD_INPUT_NOPULL;
@@ -90,6 +74,7 @@ void configure_io()
     reg_mprj_io_13 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
     reg_mprj_io_14 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
     reg_mprj_io_15 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+
     // pad_uo_out[7:0]:
     reg_mprj_io_16 =  GPIO_MODE_USER_STD_OUTPUT;
     reg_mprj_io_17 =  GPIO_MODE_USER_STD_OUTPUT;
@@ -99,17 +84,10 @@ void configure_io()
     reg_mprj_io_21 =  GPIO_MODE_USER_STD_OUTPUT;
     reg_mprj_io_22 =  GPIO_MODE_USER_STD_OUTPUT;
     reg_mprj_io_23 =  GPIO_MODE_USER_STD_OUTPUT;
-    // pad_uio_out[7:0]:
-/*
-    reg_mprj_io_24 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_25 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_26 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_27 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_28 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_29 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_30 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-    reg_mprj_io_31 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
-*/
+
+    // pad_uio_out[7:0]
+    #ifdef DEBUG_MUX
+    // set to mgmt out to help debug mux
     reg_mprj_io_24 =  GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_25 =  GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_26 =  GPIO_MODE_MGMT_STD_OUTPUT;
@@ -118,21 +96,35 @@ void configure_io()
     reg_mprj_io_29 =  GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_30 =  GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_31 =  GPIO_MODE_MGMT_STD_OUTPUT;
-    // ctrl_ena:
+    #else
+    reg_mprj_io_24 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_25 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_26 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_27 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_28 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_29 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_30 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    reg_mprj_io_31 =  GPIO_MODE_USER_STD_BIDIRECTIONAL;
+    #endif
+
+    #ifdef FW_SET_MUX
+    // ctrl_ena
+    reg_mprj_io_32 =  GPIO_MODE_MGMT_STD_BIDIRECTIONAL;
+    // ctrl_sel_inc
+    reg_mprj_io_34 =  GPIO_MODE_MGMT_STD_BIDIRECTIONAL;
+    // ctrl_sel_rst_n
+    reg_mprj_io_36 =  GPIO_MODE_MGMT_STD_BIDIRECTIONAL;
+    #else
+    // ctrl_ena
     reg_mprj_io_32 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
-    // ctrl_sel_inc:
+    // ctrl_sel_inc
     reg_mprj_io_34 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
-    // ctrl_sel_rst_n:
+    // ctrl_sel_rst_n
     reg_mprj_io_36 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+    #endif
 
     reg_mprj_xfer = 1;
     while (reg_mprj_xfer == 1);
-    /*
-    reg_mprj_io_32 =  GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_34 =  GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_36 =  GPIO_MODE_MGMT_STD_OUTPUT;
-    */
-
 }
 
 
@@ -145,38 +137,35 @@ void main()
 
     configure_io();
 
-//    SET(reg_mprj_datah, FW_READY);
 
-    reg_la0_iena = 0x0; // input enable on for LA bank 0
-    /*
-    unsigned int reg_mprj_datah_temp = 0;
-
+    #ifdef FW_SET_MUX
     // enable design 0 by sending 54 pulses
-    CLR(reg_mprj_datah_temp, CTRL_INC);
-    CLR(reg_mprj_datah_temp, CTRL_RST_N);
-    CLR(reg_mprj_datah_temp, CTRL_EN);
-    reg_mprj_datah = reg_mprj_datah_temp;
+    CLR(reg_mprj_datah, CTRL_INC);
+    CLR(reg_mprj_datah, CTRL_RST_N);
+    CLR(reg_mprj_datah, CTRL_EN);
     delay(1000);
-    SET(reg_mprj_datah_temp, CTRL_RST_N);
-    reg_mprj_datah = reg_mprj_datah_temp;
+    SET(reg_mprj_datah, CTRL_RST_N);
     delay(1000);
     for(int i = 0; i < 54; i ++ )
     {
-        SET(reg_mprj_datah_temp, CTRL_INC);
-        reg_mprj_datah = reg_mprj_datah_temp;
+        SET(reg_mprj_datah, CTRL_INC);
         delay(1000);
-        CLR(reg_mprj_datah_temp, CTRL_INC);
-        reg_mprj_datah = reg_mprj_datah_temp;
+        CLR(reg_mprj_datah, CTRL_INC);
         delay(1000);
     }
-    SET(reg_mprj_datah_temp, CTRL_EN);
-    reg_mprj_datah = reg_mprj_datah_temp;
+    SET(reg_mprj_datah, CTRL_EN);
     delay(1000);
-    */
+    #endif
+
+    #ifdef DEBUG_MUX
+    reg_la0_iena = 0x0; // input enable on for LA bank 0
+    #endif
 
 	while(1) {
+        #ifdef DEBUG_MUX
         // check with the LA if the design is selected.
         reg_mprj_datal = reg_la0_data_in << 24;
+        #endif
         reg_gpio_out = 0x0;
         delay(1000000);
         reg_gpio_out = 0x1;

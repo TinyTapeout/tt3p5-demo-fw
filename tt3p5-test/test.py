@@ -8,8 +8,8 @@ ctrl_mgmt   = Pin(1, Pin.OUT)
 
 # Set these once mgmt mux switched
 ctrl_en     = None  
-ctrl_inc    = None
 ctrl_rst_n  = None
+ctrl_inc    = Pin(6, Pin.OUT)
 
 user_clk    = Pin(0, Pin.OUT)
 user_rst_n  = Pin(5, Pin.OUT)
@@ -49,7 +49,6 @@ def reset_mux():
     ctrl_mgmt.value(0)
     time.sleep_ms(1)
     ctrl_en = Pin(8, Pin.OUT)
-    ctrl_inc = Pin(6, Pin.OUT)
     ctrl_rst_n = Pin(7, Pin.OUT)
 
     # reset the controller
@@ -103,7 +102,6 @@ def enable_design(name):
 
     # Clear ctrl pins and set up the output pin mapping
     ctrl_en = None
-    ctrl_inc = None
     ctrl_rst_n = None
 
     # Pull down to ensure 7-seg doesn't light if undriven

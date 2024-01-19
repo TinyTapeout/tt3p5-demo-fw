@@ -14,7 +14,7 @@ entry point to all the RP2040 demo pcb functionality, including
 @author: Pat Deegan
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
-
+import time
 from ttdemoboard.pins import Pins, RPMode
 from ttdemoboard.project_mux import ProjectMux
 class DemoBoard:
@@ -145,3 +145,5 @@ class DemoBoard:
         if hasattr(self.pins, name):
             return getattr(self.pins, name)
         raise AttributeError
+
+

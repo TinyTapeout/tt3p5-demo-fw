@@ -138,6 +138,8 @@ class GPIOMap:
             for k in pinModeMap.keys():
                 if k.startswith('out'):
                     pinModeMap[k] = Pin.OUT
+            
+        
         return pinModeMap
         
     @classmethod 
@@ -219,14 +221,39 @@ class MuxControl:
         self.ctrlpin = StandardPin(name, gpioIdx, Pin.OUT)
         self.ctrlpin(defValue)
         self.currentValue = defValue
+        self._muxedPins = []
+        
+    def modeProjectIO(self):
+        self.select(1)
+    def modeAdmin(self):
+        self.select(0)
+        
+    def addMuxed(self, muxd):
+        self._muxedPins.append(muxd)
         
     def select(self, value:int):
         if value == self.currentValue:
             return 
+        
+        # set the control pin according to 
+        # value.  Note that we need to make 
+        # sure we switch ALL muxed pins over
+        # otherwise we might end up with contention
+        # as two sides think they're outputs
+        # safety
+        for mp in self._muxedPins:
+            mp.currentDir = Pin.IN
+            
         if value:
             self.ctrlpin(1)
+            for mp in self._muxedPins:
+                pDeets = mp.highPin()
+                mp.currentDir = pDeets.dir
         else:
             self.ctrlpin(0)
+            for mp in self._muxedPins:
+                pDeets = mp.lowPin()
+                mp.currentDir = pDeets.dir
             
         self.currentValue = value
         
@@ -358,7 +385,7 @@ class MuxedPin(StandardPin):
             gpio:int, pinL:MuxedPinInfo, pinH:MuxedPinInfo):
         super().__init__(name, gpio, pinH.dir)
         self.ctrl = muxCtrl
-        self.currentDir = None
+        self._currentDir = None
         
         self._muxHighPin = pinH 
         self._muxLowPin = pinL 
@@ -369,13 +396,26 @@ class MuxedPin(StandardPin):
         setattr(self, self._muxLowPin.name, self._pinFunc(self._muxLowPin))
         
         
+    def highPin(self) -> MuxedPinInfo:
+        return self._muxHighPin
+    
+    def lowPin(self) -> MuxedPinInfo:
+        return self._muxLowPin
+    
+    @property 
+    def currentDir(self):
+        return self._currentDir
+    
+    @currentDir.setter 
+    def currentDir(self, setTo):
+        if self._currentDir == setTo:
+            return 
+        self._currentDir = setTo 
+        self.mode = setTo
         
     def selectPin(self, pInfo:MuxedPinInfo):
         self.ctrl.select(pInfo.select)
-        if self.currentDir != pInfo.dir:
-            # print("Change DIR")
-            self.mode = pInfo.dir 
-            self.currentDir = pInfo.dir 
+        self.currentDir = pInfo.dir 
         
     def _pinFunc(self, pInfo:MuxedPinInfo):
         def getsetter(value:int=None):
@@ -485,16 +525,23 @@ class Pins:
     
     # MUX pin is especial...
     muxName = 'hk_csb' # special pin
-    muxCtrl = MuxControl(muxName, GPIOMap.HK_CSB, Pin.OUT)
+    
     
     def __init__(self, mode:int=RPMode.SAFE):
         self.mode = mode
-        
+        self.muxCtrl = MuxControl(self.muxName, GPIOMap.HK_CSB, Pin.OUT)
         # special case: give access to mux control/HK nCS pin
         self.hk_csb = self.muxCtrl.ctrlpin
         self.pin_hk_csb = self.muxCtrl.ctrlpin.raw_pin 
+        
         self._allpins = {'hk_csb': self.hk_csb}
-        self.reset()
+        
+        if mode == RPMode.STANDALONE:
+            self.begin_standalone()
+        elif mode == RPMode.ASICONBOARD:
+            self.begin_asiconboard()
+        else:
+            self.begin_safe()
     
     def _pinFunc(self, p:Pin):
         def getsetter(value:int=None):
@@ -505,44 +552,29 @@ class Pins:
         
         return getsetter
     
+    def begin_inputs_all(self):
+        
+        for name,gpio in GPIOMap.all().items():
+            if name == self.muxName:
+                continue
+            p = StandardPin(name, gpio, Pin.IN, pull=Pin.PULL_DOWN)
+            setattr(self, f'pin_{name}', p.raw_pin)
+            setattr(self, name, p) # self._pinFunc(p)) 
+            self._allpins[name] = p
+        
+        return
     
-    def reset(self, mode:int=None):
-        if mode is not None:
-            self.mode = mode 
-            
-        if mode == RPMode.STANDALONE:
-            self.begin_standalone()
-        elif mode == RPMode.ASICONBOARD:
-            self.begin_asiconboard()
-        else:
-            self.begin_safe()
-    
+    def begin_safe(self):
+        self.begin_inputs_all()
+        self._begin_alwaysOut()
+        self._begin_muxPins()
     
     @property 
     def all(self):
         return list(self._allpins.values())
     
-    def begin_safe(self):
-        
-        for name,gpio in GPIOMap.all().items():
-            if name == self.muxName:
-                continue
-            
-            if hasattr(self, name):
-                # not our first time around
-                p = getattr(self, name)
-            else:
-                p = StandardPin(name, gpio, Pin.IN)
-                setattr(self, f'pin_{name}', p.raw_pin)
-                setattr(self, name, p) # self._pinFunc(p)) 
-                self._allpins[name] = p
-        
-        return
-    
-    
     def begin_asiconboard(self):
-        self.begin_safe()
-        
+        self.begin_inputs_all()
         self._begin_alwaysOut()
         for pname in GPIOMap.all().keys():
             if pname.startswith('in'):
@@ -553,8 +585,7 @@ class Pins:
         
     
     def begin_standalone(self):
-        self.begin_safe()
-        
+        self.begin_inputs_all()
         self._begin_alwaysOut()
         
         for pname in GPIOMap.all().keys():
@@ -577,11 +608,6 @@ class Pins:
         muxedPins = GPIOMap.muxedPairs()
         modeMap = GPIOMap.muxedPinModeMap(self.mode)
         for pname, muxPair in muxedPins.items():
-            
-            if hasattr(self,muxPair[0]) and hasattr(self, muxPair[1]):
-                # already done this
-                continue
-            
             mp = MuxedPin(pname, self.muxCtrl, 
                           getattr(self, pname),
                           MuxedPinInfo(muxPair[0],
@@ -589,6 +615,7 @@ class Pins:
                           MuxedPinInfo(muxPair[1],
                                        1, modeMap[muxPair[1]])
                           )
+            self.muxCtrl.addMuxed(mp)
             self._allpins[pname] = mp
             setattr(self, muxPair[0], getattr(mp, muxPair[0]))
             setattr(self, muxPair[1], getattr(mp, muxPair[1]))

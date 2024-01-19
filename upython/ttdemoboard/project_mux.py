@@ -59,7 +59,7 @@ class ProjectMux:
         self._design_index = None
         self.enabled = None
     
-    def reset(self): 
+    def reset(self):
         self.p.cinc(0)
         self.p.ncrst(0)
         self.p.ctrl_ena(0)
@@ -68,7 +68,11 @@ class ProjectMux:
         time.sleep_ms(10)
         self.enabled = None
         
+        
     def enable(self, design:Design):
+        
+        self.p.muxCtrl.modeAdmin() 
+        
         self.reset()
         # send the number of pulses required
         for _c in range(design.count):
@@ -79,6 +83,8 @@ class ProjectMux:
         
         self.p.ctrl_ena(1)
         self.enabled = design
+        
+        self.p.muxCtrl.modeProjectIO() 
     
     @property
     def projects(self):

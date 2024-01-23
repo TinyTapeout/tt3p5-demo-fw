@@ -17,7 +17,7 @@ See main.py for some sample usage.
 
 ### Automatic Load and Default Config
 
-The `config.ini` file has a **DEFAULT** section that may be used to specify the tt mode, and default project to enable.
+The `config.ini` file has a **DEFAULT** section that may be used to specify the demo board mode, and default project to enable.
 
 ```
 [DEFAULT]

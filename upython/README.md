@@ -479,35 +479,36 @@ Project clock PWM enabled and running at 10
 Selected design: tt_um_test
 Pins configured in mode ASICONBOARD
 Currently:
-  uio3 IN 0
-  uio5 IN 0
-  uio7 IN 0
-  rpio29 IN 0
-  uio6 IN 0
-  rp_projclk OUT 1
-  uio4 IN 0
-  sdo_out1 IN 0
-  sdi_out0 IN 0
-  ctrl_ena OUT 1
-  ncrst_out2 IN 0
-  out4 IN 0
   cinc_out3 IN 0
+  ctrl_ena OUT 1
+  hk_csb OUT 1
+  hk_sck IN 0
+  in0 OUT 0
+  in1 OUT 0
+  in2 OUT 0
+  in3 OUT 0
+  in4 OUT 0
+  in5 OUT 0
+  in6 OUT 0
+  in7 OUT 0
+  ncrst_out2 IN 0
+  nproject_rst OUT 0
+  out4 IN 0
   out5 IN 0
   out6 IN 0
   out7 IN 0
-  hk_sck IN 0
+  rp_projclk OUT 0
+  rpio29 IN 0
+  sdi_out0 IN 0
+  sdo_out1 IN 0
   uio0 IN 0
   uio1 IN 0
   uio2 IN 0
-  in2 OUT 0
-  in3 OUT 1
-  in0 OUT 0
-  in1 OUT 0
-  in6 OUT 1
-  hk_csb OUT 1
-  in4 OUT 0
-  in5 OUT 0
-  nproject_rst OUT 0
-  in7 OUT 1
+  uio3 IN 0
+  uio4 IN 0
+  uio5 IN 0
+  uio6 IN 0
+  uio7 IN 0
+
 ```
 

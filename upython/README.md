@@ -17,7 +17,7 @@ See main.py for some sample usage.
 
 ### Automatic Load and Default Config
 
-The `config.ini` file has a **DEFAULT** section that may be used to specify the demoboard mode, and default project to enable.
+The `config.ini` file has a **DEFAULT** section that may be used to specify the tt mode, and default project to enable.
 
 ```
 [DEFAULT]
@@ -46,7 +46,7 @@ After install, scripts or the REPL may be used.  With micropython, the contents 
 Efforts have been made to make console use easy, so do try out code completion using <TAB>, e.g.
 
 ```
-demoboard.shuttle.<TAB><TAB>
+tt.shuttle.<TAB><TAB>
 
 ```
 
@@ -56,45 +56,45 @@ Here's a sample REPL interaction with an overview of things to do
 
 ```
 from machine import Pin
-from ttdemoboard.mode import RPMode
-from ttdemoboard.demoboard import DemoBoard
+from ttboard.mode import RPMode
+from ttboard.demoboard import DemoBoard
 
 # get a handle to the board
-demoboard = DemoBoard()
+tt = DemoBoard()
 
 # enable a specific project, e.g.
-demoboard.shuttle.tt_um_test.enable()
+tt.shuttle.tt_um_test.enable()
 
-print(f'Project {demoboard.shuttle.enabled.name} running ({demoboard.shuttle.enabled.repo})')
+print(f'Project {tt.shuttle.enabled.name} running ({tt.shuttle.enabled.repo})')
 
 # play with the inputs
-demoboard.in0(1)
-demoboard.in7(1)
+tt.in0(1)
+tt.in7(1)
 # or as a byte
-demoboard.input_byte = 0xAA
+tt.input_byte = 0xAA
 
 # start automatic project clocking
-demoboard.clockProjectPWM(2e6) # clocking projects @ 2MHz
+tt.clockProjectPWM(2e6) # clocking projects @ 2MHz
 
 
 # observe some outputs
-if demoboard.out2():
+if tt.out2():
     print("Aha!")
 
-print(f'Output is now {demoboard.output_byte}')
+print(f'Output is now {tt.output_byte}')
 
 # play with bidir pins manually (careful)
-demoboard.uio2.mode = Pin.OUT
-demoboard.uio2(1) # set high
+tt.uio2.mode = Pin.OUT
+tt.uio2(1) # set high
 
 # or set a PWM on some pin (output to RP2040/input to ASIC)
-demoboard.uio2.pwm(2000) # set to 2kHz, duty may be specified
+tt.uio2.pwm(2000) # set to 2kHz, duty may be specified
 
-demoboard.uio2.pwm(0) # stop PWMing
+tt.uio2.pwm(0) # stop PWMing
 
 # if you changed modes on pins, like bidir, and want 
 # to switch project, reset them to IN or just
-demoboard.mode = RPMode.ASIC_ON_BOARD # or RPMode.SAFE etc
+tt.mode = RPMode.ASIC_ON_BOARD # or RPMode.SAFE etc
 ```
 
 
@@ -114,16 +114,16 @@ Finally, access the REPL using a serial terminal (under Linux, the port shows up
 
 The quick start above gives you a good idea of how this all works.
 
-If using this code as-is, with the main.py included, a `demoboard` object will already be instantiated.  Type
+If using this code as-is, with the main.py included, a `tt` object will already be instantiated.  Type
 
 ```
-demoboard.
+tt.
 ```
 
 and then use the TAB-completion--it's really handy and let's you know what's available.  E.g.
 
 ```
-demoboard.shuttle.<TAB><TAB>
+tt.shuttle.<TAB><TAB>
 ```
 
 will show you all the projects you can enable.
@@ -140,21 +140,21 @@ Possible values are:
 
 ```
 # use ini value
-demoboard = DemoBoard() # whatever was in DEFAULT.mode of config.ini
+tt = DemoBoard() # whatever was in DEFAULT.mode of config.ini
 
 
 # safe mode, the default
-demoboard = DemoBoard(RPMode.SAFE) # all RP2040 pins are inputs
+tt = DemoBoard(RPMode.SAFE) # all RP2040 pins are inputs
 
 # or: ASIC on board
-demoboard = DemoBoard(RPMode.ASIC_ON_BOARD) # ASIC drives the inputs (i.e. in0, in1 etc are OUTPUTS for the RP2040)
+tt = DemoBoard(RPMode.ASIC_ON_BOARD) # ASIC drives the inputs (i.e. in0, in1 etc are OUTPUTS for the RP2040)
 
 # or: ASIC on board but you want to twiddle inputs and clock 
 # using on-board DIP switches and buttons
-demoboard = DemoBoard(RPMode.ASIC_MANUAL_INPUTS) # ASIC drives only management pins all else are inputs
+tt = DemoBoard(RPMode.ASIC_MANUAL_INPUTS) # ASIC drives only management pins all else are inputs
 
 # or: no ASIC present -- mostly for testing/advance usage
-demoboard = DemoBoard(RPMode.STANDALONE) # hm, careful there
+tt = DemoBoard(RPMode.STANDALONE) # hm, careful there
 
 ```
 
@@ -162,15 +162,15 @@ If you've played with the pin mode (direction), you've loaded a project that mod
 
 ```
 
-# simply set the demoboard mode
-demoboard.mode = RPMode.ASIC_ON_BOARD
+# simply set the tt mode
+tt.mode = RPMode.ASIC_ON_BOARD
 
 # or call reset on the pins, to set to whatever the
 # last mode was
-demoboard.pins.reset()
+tt.pins.reset()
 
 # or with a parameter, to change modes
-demoboard.pins.reset(RPMode.SAFE) # make everything* an input
+tt.pins.reset(RPMode.SAFE) # make everything* an input
 ```
 
 
@@ -181,10 +181,10 @@ The DemoBoard object has a `shuttle` attribute, which is a container with all th
 Projects are objects which are accessed by name, e.g.
 
 ```
-demoboard.shuttle.tt_um_gatecat_fpga_top
+tt.shuttle.tt_um_gatecat_fpga_top
 # which has attributes
-demoboard.shuttle.tt_um_gatecat_fpga_top.repo
-demoboard.shuttle.tt_um_gatecat_fpga_top.commit
+tt.shuttle.tt_um_gatecat_fpga_top.repo
+tt.shuttle.tt_um_gatecat_fpga_top.commit
 # ...
 
 ```
@@ -192,7 +192,7 @@ demoboard.shuttle.tt_um_gatecat_fpga_top.commit
 These can be enabled by calling ... enable()
 
 ```
-demoboard.shuttle.tt_um_gatecat_fpga_top.enable()
+tt.shuttle.tt_um_gatecat_fpga_top.enable()
 ```
 
 This does all the control signal twiddling needed to select and enable the project using the snazzy TinyTapeout MUX.
@@ -200,17 +200,17 @@ This does all the control signal twiddling needed to select and enable the proje
 The currently enabled project, if any, is accessible in
 
 ```
->>> demoboard.shuttle.tt_um_test.enable()
+>>> tt.shuttle.tt_um_test.enable()
 
->>> demoboard.shuttle.enabled
+>>> tt.shuttle.enabled
 <Design 54: tt_um_test>
 
->>> demoboard
+>>> tt
 <DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
 
->>> demoboard.resetProject(False)
+>>> tt.resetProject(False)
 
->>> demoboard
+>>> tt
 <DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test'>
 
 ```
@@ -272,7 +272,7 @@ Values that may be set are
  * input_byte: value to set for inputs on startup (ignored if in ASIC_MANUAL_INPUTS)
  * bidir_direction: bits set to 1 are driven by RP2040
  * bidir_byte: actual value to set (only applies to outputs)
- * mode: demoboard mode to set for this project
+ * mode: tt mode to set for this project
  
 Project auto-clocking is stopped by default when a project is loaded.  If the clock_frequency is set, then 
 it will be setup accordingly.
@@ -285,53 +285,53 @@ Bi-directional pins (uio*) are reset to inputs when enabling another project.
 Pins may be read by "calling" them:
 
 ```
-if demoboard.out5():
+if tt.out5():
     # do something
 ```
 
 and set by calling with a param
 
 ```
-demoboard.in7(1)
+tt.in7(1)
 ```
 
 Mode may be set with the `mode` attrib
 
 ```
-demoboard.ui03.mode = Pin.OUT
+tt.ui03.mode = Pin.OUT
 ```
 
 
-Pins that are outputs (depends on demoboard mode) may be setup to automatically clock using
+Pins that are outputs (depends on tt mode) may be setup to automatically clock using
 
 ```
-demoboard.uio3.pwm(FREQUENCY, [DUTY_16])
+tt.uio3.pwm(FREQUENCY, [DUTY_16])
 ```
 
 If FREQUENCY is 0, PWM will stop and it will revert to simple output.  If duty cycle is not specified, it will be 50% (0xffff/2).
 
 
-The demoboard ran out of pinnage for all the things it wanted to do, so some of the connections actually go through a multiplexer.
+The tt ran out of pinnage for all the things it wanted to do, so some of the connections actually go through a multiplexer.
 
 Do you care?  No.  And you shouldn't need to.
 
 All the pins can be read or set by simply calling them:
 
 ```
-demoboard.uio4() # no param: read.  Returns the current value of uio4
-demoboard.in7(0) # with a param: write.  So here, make in7 low
+tt.uio4() # no param: read.  Returns the current value of uio4
+tt.in7(0) # with a param: write.  So here, make in7 low
 ```
 
 
 The callable() interface for the pins is available regardless of which pin it is.
 
-Under the hood, these aren't actually *machine.Pin* objects (though you can access that too) but in most instances they behave the same, so you could do things like `demoboard.in7.irq(...)` etc.  In addition, they have some useful properties that I have no idea why are lacking from machine.Pin most of the time, e.g.
+Under the hood, these aren't actually *machine.Pin* objects (though you can access that too) but in most instances they behave the same, so you could do things like `tt.in7.irq(...)` etc.  In addition, they have some useful properties that I have no idea why are lacking from machine.Pin most of the time, e.g.
 
 ```
-demoboard.uio4.mode = Pin.IN
-demoboard.uio4.pull = Pin.PULL_UP
+tt.uio4.mode = Pin.IN
+tt.uio4.pull = Pin.PULL_UP
 
-print(f'{demoboard.uio4.name} is on GPIO {demoboard.uio4.gpio_num} and is an {demoboard.uio4.mode_str}')
+print(f'{tt.uio4.name} is on GPIO {tt.uio4.gpio_num} and is an {tt.uio4.mode_str}')
 ```
 
 
@@ -340,20 +340,20 @@ In some instances--those pins that are actually behind the hardware multiplexer-
 have is the call() interface and will die if you try to do machine.Pin type things.
 
 This is on purpose, as a reminder that these are special (e.g. `out0` isn't really a pin, here... 
-you want an IRQ? set it explicitly on `demoboard.sdi_out0`).  See below, in "MUX Stuff" for more info.
+you want an IRQ? set it explicitly on `tt.sdi_out0`).  See below, in "MUX Stuff" for more info.
 
 Pins that are logically grouped together in our system can be accessed that way:
 
 ```
 
-for i in demoboard.inputs:
+for i in tt.inputs:
     i(1)
 
 # easier to just
-demoboard.input_byte = 0xff
+tt.input_byte = 0xff
 
-print(demoboard.output_byte)
-demoboard.bidirs[2](1)
+print(tt.output_byte)
+tt.bidirs[2](1)
 
 ```
 
@@ -366,7 +366,7 @@ RP GPIO to name mapping is available in the schematic or just use GPIOMap class 
 
 ```
 import machine
-from ttdemoboard.pins import GPIOMap
+from ttboard.pins import GPIOMap
 
 p = machine.Pin(GPIOMap.IN6, machine.Pin.OUT)
 # and all that
@@ -376,7 +376,7 @@ Just note that the MUX stuff needs to be handled for those pins.
 
 
 ### Available pins
-The pins available on the demoboard object include
+The pins available on the tt object include
 
   * out0 - out7
   * in0 - in7
@@ -405,10 +405,10 @@ don't *have* to know is how the MUX is transparently handled, but I'm telling yo
 anyway with an example
 
 ```
-demoboard.sdi(1) # writing to this output
+tt.sdi(1) # writing to this output
 # MUX now has switched over to control signal set
 # and sdi_out0 is an OUTPUT (which is HIGH)
-print(demoboard.out0()) # reading that pin
+print(tt.out0()) # reading that pin
 # to do this MUX has switched back to the outputs set
 # and sdi_out0 is an INPUT
 ```
@@ -420,35 +420,35 @@ You may do everything manually, if desired, using the pins.  Some useful utility
 ```
 
 # resetProject: make it clear
-demoboard.resetProject(True) # held in reset
-demoboard.resetProject(False) # not in reset
+tt.resetProject(True) # held in reset
+tt.resetProject(False) # not in reset
 
 
 # under normal operation, the project clock is 
 # an output 
->>> demoboard.project_clk
+>>> tt.project_clk
 <StandardPin rp_projclk 0 OUT>
 
 
 # clockProjectPWM: enough bit-banging already
 # auto PWM the project_clk
-demoboard.clockProjectPWM(500e3) # clock at 500kHz
+tt.clockProjectPWM(500e3) # clock at 500kHz
 
 Since it's PWMed, we now have direct access to that
->>> demoboard.project_clk
+>>> tt.project_clk
 <PWM slice=0 channel=0 invert=0>
 
->>> demoboard.project_clk.freq()
+>>> tt.project_clk.freq()
 500000
 
 
 # later
-demoboard.clockProjectPWMStop() # ok, stop that
+tt.clockProjectPWMStop() # ok, stop that
 # or
-demoboard.clockProjectPWM(0) # stops it
+tt.clockProjectPWM(0) # stops it
 
 # back to normal output
->>> demoboard.project_clk
+>>> tt.project_clk
 <StandardPin rp_projclk 0 OUT>
 
 ```
@@ -456,13 +456,13 @@ demoboard.clockProjectPWM(0) # stops it
 Also, many objects have decent representation so you can inspect them just by entering their references in the console
 
 ```
->>> demoboard
+>>> tt
 <DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
 
->>> demoboard.uio3
+>>> tt.uio3
 <StandardPin uio3 24 IN>
 
->>> demoboard.in0
+>>> tt.in0
 <StandardPin in0 9 OUT>
 
 ```
@@ -470,7 +470,7 @@ Also, many objects have decent representation so you can inspect them just by en
 And the DemoBoard objects have a *dump()* method to help with debug.
 
 ```
->>> demoboard.dump()
+>>> tt.dump()
 
 Demoboard status
 Demoboard default mode is ASIC_ON_BOARD

@@ -5,8 +5,8 @@ Created on Jan 23, 2024
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
 
-from ttdemoboard.pins.upython import Pin
-from ttdemoboard.mode import RPMode
+from ttboard.pins.upython import Pin
+from ttboard.mode import RPMode
 class GPIOMap:
     '''
         A place to store 

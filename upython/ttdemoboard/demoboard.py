@@ -14,13 +14,13 @@ entry point to all the RP2040 demo pcb functionality, including
 @author: Pat Deegan
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
-import ttdemoboard.util.time as time
-from ttdemoboard.mode import RPMode
-from ttdemoboard.pins import Pins
-from ttdemoboard.project_mux import ProjectMux, Design
-from ttdemoboard.config.user_config import UserConfig
+import ttboard.util.time as time
+from ttboard.mode import RPMode
+from ttboard.pins import Pins
+from ttboard.project_mux import ProjectMux, Design
+from ttboard.config.user_config import UserConfig
 
-import ttdemoboard.logging as logging
+import ttboard.logging as logging
 log = logging.getLogger(__name__)
 
 class DemoBoard:

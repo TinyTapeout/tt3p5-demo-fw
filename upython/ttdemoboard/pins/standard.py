@@ -5,13 +5,13 @@ Created on Jan 23, 2024
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
 
-from ttdemoboard.util.platform import IsRP2040
-from ttdemoboard.pins.upython import Pin
+from ttboard.util.platform import IsRP2040
+from ttboard.pins.upython import Pin
 
 if IsRP2040:
     import machine
 
-import  ttdemoboard.logging as logging
+import  ttboard.logging as logging
 log = logging.getLogger(__name__)
 
 class StandardPin:

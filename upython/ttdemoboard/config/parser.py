@@ -27,7 +27,9 @@ and include
  * clock_frequency: Freq, in Hz, to auto-clock
  * input_byte: value to set for inputs on startup
  * bidir_direction: bits set to one are driven by RP2040
-
+ * bidir_byte: actual value to set (only applies to outputs)
+ * mode: tt mode to set
+ 
 ============= sample config ===============
 # TT 3.5 shuttle init file
 # comment out lines by starting with #

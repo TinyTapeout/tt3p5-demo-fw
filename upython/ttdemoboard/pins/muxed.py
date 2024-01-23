@@ -5,11 +5,11 @@ Created on Jan 23, 2024
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
 
-from ttdemoboard.pins.mux_control import MuxControl
-from ttdemoboard.pins.standard import StandardPin
-from ttdemoboard.pins.upython import Pin
+from ttboard.pins.mux_control import MuxControl
+from ttboard.pins.standard import StandardPin
+from ttboard.pins.upython import Pin
 
-import ttdemoboard.logging as logging 
+import ttboard.logging as logging 
 log = logging.getLogger(__name__)
 class MuxedPinInfo:
     '''

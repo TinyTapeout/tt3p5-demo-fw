@@ -8,7 +8,7 @@ Deprecated low-level testing of boards
 '''
 
 import time
-from ttdemoboard.pins import Pins, RPMode
+from ttboard.pins import Pins, RPMode
 
 p = Pins(RPMode.STANDALONE)
 

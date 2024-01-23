@@ -8,7 +8,7 @@ Created on Jan 23, 2024
 
 class RPMode:
     SAFE = 0
-    ASICONBOARD = 1
+    ASIC_ON_BOARD = 1
     ASIC_MANUAL_INPUTS = 2
     STANDALONE = 3
     
@@ -16,7 +16,7 @@ class RPMode:
     def fromString(cls, s:str):
         modeMap = {  
             'SAFE': cls.SAFE,
-            'ASICONBOARD': cls.ASICONBOARD,
+            'ASIC_ON_BOARD': cls.ASIC_ON_BOARD,
             'ASIC_MANUAL_INPUTS': cls.ASIC_MANUAL_INPUTS,
             'STANDALONE': cls.STANDALONE
         }
@@ -34,7 +34,7 @@ class RPMode:
     def toString(cls, mode:int):
         nameMap = { 
             cls.SAFE: 'SAFE',
-            cls.ASICONBOARD: 'ASICONBOARD',
+            cls.ASIC_ON_BOARD: 'ASIC_ON_BOARD',
             cls.ASIC_MANUAL_INPUTS: 'ASIC_MANUAL_INPUTS',
             cls.STANDALONE: 'STANDALONE'
         }

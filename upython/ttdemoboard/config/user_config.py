@@ -4,8 +4,8 @@ Created on Jan 22, 2024
 @author: Pat Deegan
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
-from ttdemoboard.config.parser import ConfigParser
-from ttdemoboard.mode import RPMode
+from ttboard.config.parser import ConfigParser
+from ttboard.mode import RPMode
 
 class UserProjectConfig:
     def __init__(self, section:str, conf:ConfigParser):

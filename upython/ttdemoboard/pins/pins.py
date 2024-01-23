@@ -13,7 +13,7 @@ Main purposes of this module are to:
   
 TLDR
   1) get pins
-  p = Pins(RPMode.ASICONBOARD) # monitor/control ASIC
+  p = Pins(RPMode.ASIC_ON_BOARD) # monitor/control ASIC
   
   2) play with pins
   print(p.out2()) # read
@@ -28,18 +28,18 @@ TLDR
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
 
-from ttdemoboard.mode import RPMode
+from ttboard.mode import RPMode
 
 
-from ttdemoboard.pins.upython import Pin
-from ttdemoboard.pins.gpio_map import GPIOMap
-from ttdemoboard.pins.standard import StandardPin
-from ttdemoboard.pins.muxed import MuxedPin, MuxedPinInfo
-from ttdemoboard.pins.mux_control import MuxControl
+from ttboard.pins.upython import Pin
+from ttboard.pins.gpio_map import GPIOMap
+from ttboard.pins.standard import StandardPin
+from ttboard.pins.muxed import MuxedPin, MuxedPinInfo
+from ttboard.pins.mux_control import MuxControl
 
 
 
-import ttdemoboard.logging as logging
+import ttboard.logging as logging
 log = logging.getLogger(__name__)
 
 
@@ -106,7 +106,7 @@ class Pins:
         
         So this class has 3 modes of pin init at startup:
          * RPMode.SAFE, the default, which has every pin as an INPUT, no pulls
-         * RPMode.ASICONBOARD, for use with ASICs, where it watches the OUTn 
+         * RPMode.ASIC_ON_BOARD, for use with ASICs, where it watches the OUTn 
            (configured as inputs) and can drive the INn and tickle the 
            ASIC inputs (configured as outputs)
          * RPMode.STANDALONE: where OUTn is an OUTPUT, INn is an input, useful
@@ -157,7 +157,7 @@ class Pins:
     def mode(self, setTo:int):
         startupMap = {
             RPMode.STANDALONE: self.begin_standalone,
-            RPMode.ASICONBOARD: self.begin_asiconboard,
+            RPMode.ASIC_ON_BOARD: self.begin_asiconboard,
             RPMode.ASIC_MANUAL_INPUTS: self.begin_asic_manual_inputs,
             RPMode.SAFE: self.begin_safe
         }
@@ -255,7 +255,7 @@ class Pins:
     
     
     def begin_asiconboard(self):
-        log.debug('begin: ASICONBOARD')
+        log.debug('begin: ASIC_ON_BOARD')
         self.begin_inputs_all()
         self._begin_alwaysOut()
         self.pclockAndResetControlledByRP2040(True)

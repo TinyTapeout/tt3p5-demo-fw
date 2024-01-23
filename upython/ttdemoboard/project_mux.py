@@ -6,10 +6,10 @@ Created on Jan 9, 2024
 '''
 
 import json
-import ttdemoboard.util.time as time
-from ttdemoboard.pins import Pins
+import ttboard.util.time as time
+from ttboard.pins import Pins
 
-import ttdemoboard.logging as logging
+import ttboard.logging as logging
 log = logging.getLogger(__name__)
 
 class Design:

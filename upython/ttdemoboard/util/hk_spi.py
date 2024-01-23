@@ -4,9 +4,9 @@ Created on Jan 18, 2024
 @author: Pat Deegan
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
-from ttdemoboard.util.platform import IsRP2040
-from ttdemoboard.pins import Pins
-from ttdemoboard.demoboard import DemoBoard
+from ttboard.util.platform import IsRP2040
+from ttboard.pins import Pins
+from ttboard.demoboard import DemoBoard
 
 if IsRP2040:
     import machine

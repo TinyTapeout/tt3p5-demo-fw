@@ -264,7 +264,7 @@ class Pins:
                 p = getattr(self, pname)
                 if self.dieOnInputControlSwitchHigh:
                     if p():
-                        raise IOError(f'Trying to control {pname} but possible contention (it is reading HIGH)')
+                        raise ValueError(f'Trying to control {pname} but possible contention (it is reading HIGH)')
                 p.mode = Pin.OUT
                 
         self._begin_muxPins()
@@ -339,7 +339,7 @@ class Pins:
     def dump(self):
         print(f'Pins configured in mode {RPMode.toString(self.mode)}')
         print(f'Currently:')
-        for pname in GPIOMap.all().keys():
+        for pname in sorted(GPIOMap.all().keys()):
             self._dumpPin(getattr(self, pname))
     
     

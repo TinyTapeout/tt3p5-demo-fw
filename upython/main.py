@@ -62,6 +62,38 @@ def test_design_tnt_counter():
             time.sleep_ms(100)
     except KeyboardInterrupt:
         demoboard.clockProjectPWMStop()
+        
+def test_bidirs():
+    # select the project from the shuttle
+    demoboard.shuttle.tt_um_test.enable()
+    curMode = demoboard.mode 
+    demoboard.mode = RPMode.ASICONBOARD # make sure we're controlling everything
+    
+    demoboard.in0(0) # want this low
+    demoboard.clockProjectPWM(1e3) # clock it real good
+    
+    for bp in demoboard.bidirs:
+        bp.mode = Pin.OUT
+        bp(0) # start low
+    
+    errCount = 0
+    for i in range(0xff):
+        demoboard.bidir_byte = i 
+        time.sleep_ms(1)
+        outbyte = demoboard.output_byte
+        if outbyte !=  i:
+            print(f'MISMATCH between bidir val {i} and output {outbyte}')
+            errCount += 1
+    
+    if errCount:
+        print(f'{errCount} ERRORS encountered??!')
+    else:
+        print('Bi-directional pins acting pretty nicely as inputs!')
+        
+    # reset everything
+    demoboard.mode = curMode
+            
+    
 
 def test_neptune():
     demoboard.shuttle.tt_um_psychogenic_neptuneproportional.enable()

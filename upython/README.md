@@ -8,17 +8,59 @@ entry point to all the TinyTapeout demo pcb's RP2040 functionality, including
     * pins (named, transparently muxed)
     * projects (all shuttle projects and means to enable)
     * basic utilities (auto clocking projects etc)
+    * default and per-project configuration with ini file
     
 ## Quick Start
 
-After install, scripts or the REPL may be used to do things like
+See main.py for some sample usage.
+
+
+### Automatic Load and Default Config
+
+The `config.ini` file has a **DEFAULT** section that may be used to specify the demoboard mode, and default project to enable.
+
+```
+[DEFAULT]
+# project: project to load by default
+project = tt_um_test
+
+# start in reset (bool)
+start_in_reset = no
+
+# mode can be any of
+#  - SAFE: all RP2040 pins inputs
+#  - ASICONBOARD: TT inputs,nrst and clock driven, outputs monitored
+#  - ASIC_MANUAL_INPUTS: basically same as safe, but intent is clear
+#  - STANDALONE: *no* TT ASIC on-board, testing mode, outputs driven, inputs monitored
+mode = ASICONBOARD
+
+```
+Each project on the shuttle may have it's own section as well, with additional attributes.  All attributes are optional.
+See the config section, below, for details.
+
+
+### REPL and Scripting
+
+After install, scripts or the REPL may be used.  With micropython, the contents of main.py are executed on boot.
+
+Efforts have been made to make console use easy, so do try out code completion using <TAB>, e.g.
+
+```
+demoboard.shuttle.<TAB><TAB>
+
+```
+
+will show you all the projects that might be enabled, etc.
+
+Here's a sample REPL interaction with an overview of things to do
 
 ```
 from machine import Pin
-from ttdemoboard.demoboard import DemoBoard, RPMode
+from ttdemoboard.mode import RPMode
+from ttdemoboard.demoboard import DemoBoard
 
 # get a handle to the board
-demoboard = DemoBoard(RPMode.ASICONBOARD)
+demoboard = DemoBoard()
 
 # enable a specific project, e.g.
 demoboard.shuttle.tt_um_test.enable()
@@ -41,14 +83,18 @@ if demoboard.out2():
 
 print(f'Output is now {demoboard.output_byte}')
 
-# play with bidir pins (careful)
+# play with bidir pins manually (careful)
 demoboard.uio2.mode = Pin.OUT
 demoboard.uio2(1) # set high
 
+# or set a PWM on some pin (output to RP2040/input to ASIC)
+demoboard.uio2.pwm(2000) # set to 2kHz, duty may be specified
+
+demoboard.uio2.pwm(0) # stop PWMing
+
 # if you changed modes on pins, like bidir, and want 
 # to switch project, reset them to IN or just
-demoboard.pins.reset() 
-# before you switch projects
+demoboard.mode = RPMode.ASICONBOARD # or RPMode.SAFE etc
 ```
 
 
@@ -77,7 +123,7 @@ demoboard.
 and then use the TAB-completion--it's really handy and let's you know what's available.  E.g.
 
 ```
-demoboard.shuttle.[TAB][TAB]
+demoboard.shuttle.<TAB><TAB>
 ```
 
 will show you all the projects you can enable.
@@ -85,7 +131,12 @@ will show you all the projects you can enable.
 
 ## Initialization
 
-When the DemoBoard object is created, you give it a parameter to indicate how you intend to use it.  Possible values are
+When the DemoBoard object is created, you _may_ give it a parameter to indicate how you intend to use it.  
+
+If not specifed, the value in `config.ini` DEFAULT section `mode` will be used.
+
+
+Possible values are:
 
 ```
 
@@ -93,7 +144,11 @@ When the DemoBoard object is created, you give it a parameter to indicate how yo
 demoboard = DemoBoard(RPMode.SAFE) # all RP2040 pins are inputs
 
 # or: ASIC on board
-demoboard = DemoBoard(RPMode.ASICONBOARD) # ASIC drives the outputs
+demoboard = DemoBoard(RPMode.ASICONBOARD) # ASIC drives the inputs (i.e. in0, in1 etc are OUTPUTS for the RP2040)
+
+# or: ASIC on board but you want to twiddle inputs and clock 
+# using on-board DIP switches and buttons
+demoboard = DemoBoard(RPMode.ASIC_MANUAL_INPUTS) # ASIC drives only management pins all else are inputs
 
 # or: no ASIC present -- mostly for testing/advance usage
 demoboard = DemoBoard(RPMode.STANDALONE) # hm, careful there
@@ -104,7 +159,11 @@ If you've played with the pin mode (direction) or you want to change modes, you 
 
 ```
 
-# reset to current RPMode, e.g. ASICONBOARD
+# simply set the demoboard mode
+demoboard.mode = RPMode.ASICONBOARD
+
+# or call reset on the pins, to set to whatever the
+# last mode was
 demoboard.pins.reset()
 
 # or with a parameter, to change modes
@@ -141,7 +200,101 @@ The currently enabled project, if any, is accessible in
 demoboard.shuttle.enabled
 ```
 
+
+## Configuration
+
+A `config.ini` file may be used to setup defaults (e.g. default mode or project to load on boot) as well as specific configuration to apply when loading a project in particular.  See the included `config.ini` for samples with commentary.
+
+### Sections and Values
+
+This is *similar* to, but not the same (because hand-crufted) as the python config parser.
+
+Sections are simply name `[SECTION]`.
+
+Values are 
+
+```
+key = value
+```
+
+Where the value may be
+
+   * a string
+   * a numerical value (an int, float, 0xnn or 0bnnnnnnnn representation)
+   * a boolean (true, false, yes, no)
+   * a comment (a line beginning with #)
+
+
+### System Defaults
+
+System-wide default settings supported are
+
+project: (string) name of project to load on boot, e.g. *tt_um_loopback*
+
+mode: (string) ASICONBOARD, ASIC_MANUAL_INPUTS (to use the on-board switches/buttons), SAFE and STANDALONE (risky if ASIC on PCB)
+
+start_in_reset: (bool) whether projects should have their nRESET pin held low when enabled
+
+
+### Project-specific
+
+Some values may be auto-configured when enabling a project, by having them specified in their own section.
+The section name is 
+
+```
+[PROJECT_NAME]
+```
+
+as specified in the shuttle, for instance
+
+```
+[tt_um_psychogenic_neptuneproportional]
+
+```
+
+Values that may be set are
+ * clock_frequency: Frequency, in Hz, to auto-clock on project clock pin (ignored if in ASIC_MANUAL_INPUTS)
+ * input_byte: value to set for inputs on startup (ignored if in ASIC_MANUAL_INPUTS)
+ * bidir_direction: bits set to 1 are driven by RP2040
+ * bidir_byte: actual value to set (only applies to outputs)
+ * mode: demoboard mode to set for this project
+ 
+Project auto-clocking is stopped by default when a project is loaded.  If the clock_frequency is set, then 
+it will be setup accordingly.
+
+Bi-directional pins (uio*) are reset to inputs when enabling another project.
+
+
 ## Pins
+
+Pins may be read by "calling" them:
+
+```
+if demoboard.out5():
+    # do something
+```
+
+and set by calling with a param
+
+```
+demoboard.in7(1)
+```
+
+Mode may be set with the `mode` attrib
+
+```
+demoboard.ui03.mode = Pin.OUT
+```
+
+
+Pins that are outputs (depends on demoboard mode) may be setup to automatically clock using
+
+```
+demoboard.uio3.pwm(FREQUENCY, [DUTY_16])
+```
+
+If FREQUENCY is 0, PWM will stop and it will revert to simple output.  If duty cycle is not specified, it will be 50% (0xffff/2).
+
 
 The demoboard ran out of pinnage for all the things it wanted to do, so some of the connections actually go through a multiplexer.
 
@@ -153,6 +306,7 @@ All the pins can be read or set by simply calling them:
 demoboard.uio4() # no param: read.  Returns the current value of uio4
 demoboard.in7(0) # with a param: write.  So here, make in7 low
 ```
+
 
 The callable() interface for the pins is available regardless of which pin it is.
 
@@ -213,7 +367,9 @@ The pins available on the demoboard object include
   * in0 - in7
   * uio0 - uio7
   * project_clk
-  * project_nrst 
+  * project_nrst
+
+
 
 NOTE that this naming reflect the perspective of the *ASIC*.  The *ASIC* normally be writing to out pins and reading from in pins, and this is how pins are setup when using the `ASICONBOARD` mode (you, on the RP2040, read from out5 so it is an Pin.IN, etc).
 

@@ -20,7 +20,7 @@ if IsRP2040:
             self.name = name 
             self.loglevel = DefaultLogLevel
         def out(self, s, level:int):
-            if self.loglevel >= level:
+            if self.loglevel <= level:
                 print(f'{self.name}: {s}')
             
         def debug(self, s):

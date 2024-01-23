@@ -35,3 +35,8 @@ class Pin:
         log.debug(f'Setting GPIO {self.gpio} to direction {direction}')
         self.dir = direction
 
+    def __call__(self, value:int=None):
+        if value is not None:
+            self.val = value
+            return
+        return self.val

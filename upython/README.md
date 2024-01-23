@@ -139,6 +139,9 @@ If not specifed, the value in `config.ini` DEFAULT section `mode` will be used.
 Possible values are:
 
 ```
+# use ini value
+demoboard = DemoBoard() # whatever was in DEFAULT.mode of config.ini
+
 
 # safe mode, the default
 demoboard = DemoBoard(RPMode.SAFE) # all RP2040 pins are inputs
@@ -155,7 +158,7 @@ demoboard = DemoBoard(RPMode.STANDALONE) # hm, careful there
 
 ```
 
-If you've played with the pin mode (direction) or you want to change modes, you can call reset() on the Pins container
+If you've played with the pin mode (direction), you've loaded a project that modified the mode or you just want to change modes, you can set the attribute explicitly or call reset() on the Pins container
 
 ```
 

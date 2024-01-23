@@ -21,7 +21,7 @@ class RPMode:
             'STANDALONE': cls.STANDALONE
         }
         
-        if s is None or not hasattr(s, upper):
+        if s is None or not hasattr(s, 'upper'):
             return None
         sup = s.upper()
         if sup not in modeMap:

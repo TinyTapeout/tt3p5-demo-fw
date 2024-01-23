@@ -6,8 +6,11 @@ Created on Jan 9, 2024
 '''
 
 import json
-import time
+import ttdemoboard.util.time as time
 from ttdemoboard.pins import Pins
+
+import ttdemoboard.logging as logging
+log = logging.getLogger(__name__)
 
 class Design:
     def __init__(self, projectMux, projindex:int, info:dict):
@@ -22,6 +25,9 @@ class Design:
     def enable(self):
         self.mux.enable(self)
         
+    def disable(self):
+        self.mux.disable()
+        
     def __str__(self):
         return self.name 
     
@@ -29,7 +35,7 @@ class Design:
         return f'<Design {self.project_index}: {self.name}>'
         
 class DesignIndex:
-    def __init__(self, projectMux, srcJSONFile:str='shuttle_index.json'):
+    def __init__(self, projectMux,  srcJSONFile:str='shuttle_index.json'):
         self._shuttle_index = dict()
         self._project_count = 0
         with open(srcJSONFile) as fh:
@@ -39,8 +45,9 @@ class DesignIndex:
                 self._shuttle_index[des.name] = des
                 setattr(self, des.name, des)
                 self._project_count += 1
-                
-    @property 
+             
+    
+    @property
     def count(self):
         return self._project_count
                 
@@ -58,8 +65,10 @@ class ProjectMux:
         self.p = pins 
         self._design_index = None
         self.enabled = None
+        self.designEnabledCallback = None
     
     def reset(self):
+        log.debug('Resetting project mux')
         self.p.cinc(0)
         self.p.ncrst(0)
         self.p.ctrl_ena(0)
@@ -68,24 +77,37 @@ class ProjectMux:
         time.sleep_ms(10)
         self.enabled = None
         
+    def disable(self):
+        log.info(f'Disable (selecting project 0)')
+        self.resetAndClockMux(0)
+        self.enabled = None
         
     def enable(self, design:Design):
         
+        log.info(f'Enable design {design.name}')
+        self.resetAndClockMux(design.count)
+        self.enabled = design
+        if self.designEnabledCallback is not None:
+            self.designEnabledCallback(design)
+            
+    
+    def resetAndClockMux(self, count:int):
+        self.p.safe_bidir() # reset bidirectionals to safe mode
+        
+        # enable admin pins through hw mux
         self.p.muxCtrl.modeAdmin() 
         
         self.reset()
         # send the number of pulses required
-        for _c in range(design.count):
+        for _c in range(count):
             self.p.cinc(1)
             time.sleep_ms(1)
             self.p.cinc(0)
             time.sleep_ms(1)
         
         self.p.ctrl_ena(1)
-        self.enabled = design
-        
         self.p.muxCtrl.modeProjectIO() 
-    
+        
     @property
     def projects(self):
         if self._design_index is None:

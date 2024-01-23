@@ -14,9 +14,15 @@ entry point to all the RP2040 demo pcb functionality, including
 @author: Pat Deegan
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
-import time
-from ttdemoboard.pins import Pins, RPMode
-from ttdemoboard.project_mux import ProjectMux
+import ttdemoboard.util.time as time
+from ttdemoboard.mode import RPMode
+from ttdemoboard.pins import Pins
+from ttdemoboard.project_mux import ProjectMux, Design
+from ttdemoboard.config.user_config import UserConfig
+
+import ttdemoboard.logging as logging
+log = logging.getLogger(__name__)
+
 class DemoBoard:
     '''
         The DemoBoard object has 
@@ -43,7 +49,10 @@ class DemoBoard:
         
     
     '''
-    def __init__(self, mode:int=RPMode.SAFE):
+    def __init__(self, 
+                 mode:int=None, 
+                 iniFile:str='config.ini',
+                 applyUserConfig:bool=True):
         '''
             Constructor takes a mode parameter, one of:
             
@@ -59,11 +68,48 @@ class DemoBoard:
             Choose wisely (only STANDALONE has serious contention risk)
         
         '''
+        # interfaces 
+        self.user_config = UserConfig(iniFile)
+        
+        if mode is not None:
+            self.default_mode = mode 
+        else:
+            self.default_mode = self.user_config.default_mode
+            if self.default_mode is None:
+                # neither arg and ini file specify mode
+                raise AttributeError('MUST specify either mode in .ini DEFAULT or mode argument')
+            
+            mode = self.default_mode
+            
+        log.info(f'Demoboard starting up in mode {RPMode.toString(mode)}')
+        
         self.pins = Pins(mode=mode)
         self.shuttle = ProjectMux(self.pins)
+        
+        # config
+        self.apply_user_config = applyUserConfig
+        
+        # internal
+        self.shuttle.designEnabledCallback = self.applyUserConfig
         self._clock_pwm = None
         
+    @property 
+    def mode(self):
+        return self.pins.mode 
+    
+    @mode.setter 
+    def mode(self, setTo:int):
+        if self.mode != setTo:
+            if self.isAutoClocking:
+                autoClockFreq = self._clock_pwm.freq()
+                self.clockProjectPWMStop()
+                log.warn(f'Was auto-clocking @ {autoClockFreq} but stopping for mode change')
+                
+        self.pins.mode = setTo 
         
+    @property 
+    def isAutoClocking(self):
+        return self._clock_pwm is not None
     @property 
     def project_clk(self):
         '''
@@ -75,14 +121,21 @@ class DemoBoard:
             
             all the usual pin stuff.
             
-            @see: clockProject(), clockProjectPWM() and clockProjectPWMStop()
+            @note: if you've enabled PWM on the clock pin, that's what is returned
+            rather than the pin itself.  If you really need the pin while 
+            PWM is running, you can get it from pins.rp_projclk
+            
+            
+            @see: clockProjectOnce(), clockProjectPWM() and clockProjectPWMStop()
         '''
+        if self._clock_pwm is not None:
+            return self._clock_pwm
         return self.pins.rp_projclk
     
     @property 
     def project_nrst(self):
         '''
-            Quick access to project clock pin.
+            Quick access to project reset pin.
             
             project_nrst(1) # write
             project_nrst.on() # same
@@ -103,11 +156,11 @@ class DemoBoard:
             resetProject(False) # now it ain't
         '''
         if putInReset:
-            self.project_nrst = False # inverted logic
+            self.project_nrst(0) # inverted logic
         else:
-            self.project_nrst = True
+            self.project_nrst(1)
             
-    def clockProject(self, msDelay:int=0):
+    def clockProjectOnce(self, msDelay:int=0):
         '''
             Utility method to toggle project clock 
             pin twice, optionally with a delay
@@ -127,6 +180,8 @@ class DemoBoard:
             @param duty_u16: Optional duty cycle (0-0xffff), defaults to 50%  
         '''
         self.clockProjectPWMStop()
+        if freqHz < 1: # equiv to stop 
+            return 
         self._clock_pwm = self.project_clk.pwm(freqHz, duty_u16)
         return self._clock_pwm
     
@@ -141,9 +196,130 @@ class DemoBoard:
         self._clock_pwm.deinit()
         self._clock_pwm = None
     
+    
+    def applyUserConfig(self, design:Design):
+        
+        log.debug(f'Design "{design.name}" loaded, apply user conf')
+        
+        applyWhenInModeMap = {
+            RPMode.ASICONBOARD: True,
+            RPMode.ASIC_MANUAL_INPUTS: True
+        }
+        if not self.apply_user_config:
+            log.debug(f'apply user conf: disabled')
+            # don't wanna
+            return 
+        
+        if self.mode not in applyWhenInModeMap:
+            log.debug(f'apply user conf: disallowed in this mode')
+            # won't do it in this mode 
+            return 
+        
+        if not self.user_config.has_project(design.name):
+            log.debug(f'apply user conf: no user config for project')
+            # nothing to do
+            return 
+        
+        projConfig = self.user_config.project(design.name)
+        
+        
+        desiredMode = RPMode.fromString(projConfig.mode)
+        if desiredMode is not None:
+            log.warn(f'Switching to mode {projConfig.mode} for design "{design.name}"')
+            self.mode = desiredMode
+        
+        # start in reset (project nRST pin)
+        # set in project section
+        # or use DEFAULT
+        # and if not set in either, don't touch
+        startInReset = projConfig.start_in_reset
+        if startInReset is None:
+            startInReset = self.user_config.default_start_in_reset
+            
+        if startInReset is not None:
+            if self.mode != RPMode.ASIC_MANUAL_INPUTS:
+                self.resetProject(startInReset)
+        
+        
+        # input byte
+        if projConfig.has('input_byte') and self.mode != RPMode.ASIC_MANUAL_INPUTS:
+            btVal = projConfig.input_byte
+            log.debug(f'Setting input byte to {btVal}')
+            self.pins.input_byte = btVal
+            
+        if projConfig.bidir_direction is not None:
+            dirBits = projConfig.bidir_direction
+            log.debug(f'Setting bidir pin direction to {hex(dirBits)}')
+            bidirs = self.pins.bidirs 
+            
+            for i in range(8):
+                if dirBits & (1 << i):
+                    bidirs[i].mode = Pins.OUT
+                    
+            if projConfig.bidir_byte is not None:
+                valBits = projConfig.bidir_byte
+                log.debug(f'Also setting bidir byte values {hex(valBits)}')
+                for i in range(8):
+                    mask = (1 << i) 
+                    if (dirBits & mask): # this is actually an output
+                        if valBits & mask: # and we want it high
+                            bidirs[i](1)
+                        else: # nah, want it low
+                            bidirs[i](0)
+                    
+        if projConfig.has('clock_frequency') and self.mode != RPMode.ASIC_MANUAL_INPUTS:
+            self.clockProjectPWM(projConfig.clock_frequency)
+        else:
+            self.clockProjectPWMStop()
+            
+            
+    def dump(self):
+        print('\n\nDemoboard status')
+        print(f'Demoboard default mode is {RPMode.toString(self.default_mode)}')
+        print(f'Project nRESET pin is {self.project_nrst.mode_str} {self.project_nrst()}')
+        
+        if self._clock_pwm is not None:
+            print(f'Project clock PWM enabled and running at {self._clock_pwm.freq()}')
+        else:
+            print('Project clock: no PWM auto-clocking enabled')
+            
+            
+        if self.shuttle.enabled is None:
+            print('No selected design')
+        else:
+            print(f'Selected design: {self.shuttle.enabled}')
+            
+        print()
+        self.pins.dump()
+        
+        print('\n\n')
+        
+    def __repr__(self):
+        if self._clock_pwm:
+            autoclocking = f', auto-clocking @ {self._clock_pwm.freq()}'
+        else:
+            autoclocking = ''
+            
+        reset = ''
+        if self.shuttle.enabled is not None and not self.project_nrst(): # works whether is input or output
+            reset = ' (in RESET)'
+        return f"<DemoBoard as {RPMode.toString(self.mode)}{autoclocking}, project '{self.shuttle.enabled}'{reset}>"
+    
     def __getattr__(self, name):
         if hasattr(self.pins, name):
             return getattr(self.pins, name)
         raise AttributeError
+    
+    def __setattr__(self, name, value):
+        try:
+            pins = getattr(self, 'pins')
+            if pins is not None and hasattr(pins, name):
+                return setattr(pins, name, value)
+        except:
+            pass
+        
+        super().__setattr__(name, value)
 
+
+    
 

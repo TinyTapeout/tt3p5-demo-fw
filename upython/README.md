@@ -29,10 +29,10 @@ start_in_reset = no
 
 # mode can be any of
 #  - SAFE: all RP2040 pins inputs
-#  - ASICONBOARD: TT inputs,nrst and clock driven, outputs monitored
+#  - ASIC_ON_BOARD: TT inputs,nrst and clock driven, outputs monitored
 #  - ASIC_MANUAL_INPUTS: basically same as safe, but intent is clear
 #  - STANDALONE: *no* TT ASIC on-board, testing mode, outputs driven, inputs monitored
-mode = ASICONBOARD
+mode = ASIC_ON_BOARD
 
 ```
 Each project on the shuttle may have it's own section as well, with additional attributes.  All attributes are optional.
@@ -94,7 +94,7 @@ demoboard.uio2.pwm(0) # stop PWMing
 
 # if you changed modes on pins, like bidir, and want 
 # to switch project, reset them to IN or just
-demoboard.mode = RPMode.ASICONBOARD # or RPMode.SAFE etc
+demoboard.mode = RPMode.ASIC_ON_BOARD # or RPMode.SAFE etc
 ```
 
 
@@ -147,7 +147,7 @@ demoboard = DemoBoard() # whatever was in DEFAULT.mode of config.ini
 demoboard = DemoBoard(RPMode.SAFE) # all RP2040 pins are inputs
 
 # or: ASIC on board
-demoboard = DemoBoard(RPMode.ASICONBOARD) # ASIC drives the inputs (i.e. in0, in1 etc are OUTPUTS for the RP2040)
+demoboard = DemoBoard(RPMode.ASIC_ON_BOARD) # ASIC drives the inputs (i.e. in0, in1 etc are OUTPUTS for the RP2040)
 
 # or: ASIC on board but you want to twiddle inputs and clock 
 # using on-board DIP switches and buttons
@@ -163,7 +163,7 @@ If you've played with the pin mode (direction), you've loaded a project that mod
 ```
 
 # simply set the demoboard mode
-demoboard.mode = RPMode.ASICONBOARD
+demoboard.mode = RPMode.ASIC_ON_BOARD
 
 # or call reset on the pins, to set to whatever the
 # last mode was
@@ -206,12 +206,12 @@ The currently enabled project, if any, is accessible in
 <Design 54: tt_um_test>
 
 >>> demoboard
-<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
+<DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
 
 >>> demoboard.resetProject(False)
 
 >>> demoboard
-<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test'>
+<DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test'>
 
 ```
 
@@ -246,7 +246,7 @@ System-wide default settings supported are
 
 project: (string) name of project to load on boot, e.g. *tt_um_loopback*
 
-mode: (string) ASICONBOARD, ASIC_MANUAL_INPUTS (to use the on-board switches/buttons), SAFE and STANDALONE (risky if ASIC on PCB)
+mode: (string) ASIC_ON_BOARD, ASIC_MANUAL_INPUTS (to use the on-board switches/buttons), SAFE and STANDALONE (risky if ASIC on PCB)
 
 start_in_reset: (bool) whether projects should have their nRESET pin held low when enabled
 
@@ -386,7 +386,7 @@ The pins available on the demoboard object include
 
 
 
-NOTE that this naming reflect the perspective of the *ASIC*.  The *ASIC* normally be writing to out pins and reading from in pins, and this is how pins are setup when using the `ASICONBOARD` mode (you, on the RP2040, read from out5 so it is an Pin.IN, etc).
+NOTE that this naming reflect the perspective of the *ASIC*.  The *ASIC* normally be writing to out pins and reading from in pins, and this is how pins are setup when using the `ASIC_ON_BOARD` mode (you, on the RP2040, read from out5 so it is an Pin.IN, etc).
 
 
 ### MUX Stuff
@@ -457,7 +457,7 @@ Also, many objects have decent representation so you can inspect them just by en
 
 ```
 >>> demoboard
-<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
+<DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
 
 >>> demoboard.uio3
 <StandardPin uio3 24 IN>
@@ -473,11 +473,11 @@ And the DemoBoard objects have a *dump()* method to help with debug.
 >>> demoboard.dump()
 
 Demoboard status
-Demoboard default mode is ASICONBOARD
+Demoboard default mode is ASIC_ON_BOARD
 Project nRESET pin is OUT 0
 Project clock PWM enabled and running at 10
 Selected design: tt_um_test
-Pins configured in mode ASICONBOARD
+Pins configured in mode ASIC_ON_BOARD
 Currently:
   cinc_out3 IN 0
   ctrl_ena OUT 1

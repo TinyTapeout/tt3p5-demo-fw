@@ -17,8 +17,8 @@ def startup():
     global demoboard
     
     # construct DemoBoard
-    # either pass an appropriate RPMode, e.g. RPMode.ASICONBOARD
-    # or have "mode = ASICONBOARD" in ini DEFAULT section
+    # either pass an appropriate RPMode, e.g. RPMode.ASIC_ON_BOARD
+    # or have "mode = ASIC_ON_BOARD" in ini DEFAULT section
     demoboard = DemoBoard()
 
     
@@ -67,7 +67,7 @@ def test_bidirs():
     # select the project from the shuttle
     demoboard.shuttle.tt_um_test.enable()
     curMode = demoboard.mode 
-    demoboard.mode = RPMode.ASICONBOARD # make sure we're controlling everything
+    demoboard.mode = RPMode.ASIC_ON_BOARD # make sure we're controlling everything
     
     demoboard.in0(0) # want this low
     demoboard.clockProjectPWM(1e3) # clock it real good

@@ -58,7 +58,7 @@ class DemoBoard:
             
              * RPMode.SAFE, the default, which has every pin as an INPUT, no pulls
              
-             * RPMode.ASICONBOARD, for use with ASICs, where it watches the OUTn 
+             * RPMode.ASIC_ON_BOARD, for use with ASICs, where it watches the OUTn 
                (configured as inputs) and can drive the INn and tickle the 
                ASIC inputs (configured as outputs)
                
@@ -202,7 +202,7 @@ class DemoBoard:
         log.debug(f'Design "{design.name}" loaded, apply user conf')
         
         applyWhenInModeMap = {
-            RPMode.ASICONBOARD: True,
+            RPMode.ASIC_ON_BOARD: True,
             RPMode.ASIC_MANUAL_INPUTS: True
         }
         if not self.apply_user_config:

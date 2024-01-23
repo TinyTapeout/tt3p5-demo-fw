@@ -411,9 +411,91 @@ You may do everything manually, if desired, using the pins.  Some useful utility
 demoboard.resetProject(True) # held in reset
 demoboard.resetProject(False) # not in reset
 
+
+# under normal operation, the project clock is 
+# an output 
+>>> demoboard.project_clk
+<StandardPin rp_projclk 0 OUT>
+
+
 # clockProjectPWM: enough bit-banging already
+# auto PWM the project_clk
 demoboard.clockProjectPWM(500e3) # clock at 500kHz
+
+Since it's PWMed, we now have direct access to that
+>>> demoboard.project_clk
+<PWM slice=0 channel=0 invert=0>
+
+>>> demoboard.project_clk.freq()
+500000
+
+
 # later
 demoboard.clockProjectPWMStop() # ok, stop that
+# or
+demoboard.clockProjectPWM(0) # stops it
+
+# back to normal output
+>>> demoboard.project_clk
+<StandardPin rp_projclk 0 OUT>
+
+```
+
+Also, many objects have decent representation so you can inspect them just by entering their references in the console
+
+```
+>>> demoboard
+<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
+
+>>> demoboard.uio3
+<StandardPin uio3 24 IN>
+
+>>> demoboard.in0
+<StandardPin in0 9 OUT>
+
+```
+
+And the DemoBoard objects have a *dump()* method to help with debug.
+
+```
+>>> demoboard.dump()
+
+Demoboard status
+Demoboard default mode is ASICONBOARD
+Project nRESET pin is OUT 0
+Project clock PWM enabled and running at 10
+Selected design: tt_um_test
+Pins configured in mode ASICONBOARD
+Currently:
+  uio3 IN 0
+  uio5 IN 0
+  uio7 IN 0
+  rpio29 IN 0
+  uio6 IN 0
+  rp_projclk OUT 1
+  uio4 IN 0
+  sdo_out1 IN 0
+  sdi_out0 IN 0
+  ctrl_ena OUT 1
+  ncrst_out2 IN 0
+  out4 IN 0
+  cinc_out3 IN 0
+  out5 IN 0
+  out6 IN 0
+  out7 IN 0
+  hk_sck IN 0
+  uio0 IN 0
+  uio1 IN 0
+  uio2 IN 0
+  in2 OUT 0
+  in3 OUT 1
+  in0 OUT 0
+  in1 OUT 0
+  in6 OUT 1
+  hk_csb OUT 1
+  in4 OUT 0
+  in5 OUT 0
+  nproject_rst OUT 0
+  in7 OUT 1
 ```
 

@@ -200,7 +200,19 @@ This does all the control signal twiddling needed to select and enable the proje
 The currently enabled project, if any, is accessible in
 
 ```
-demoboard.shuttle.enabled
+>>> demoboard.shuttle.tt_um_test.enable()
+
+>>> demoboard.shuttle.enabled
+<Design 54: tt_um_test>
+
+>>> demoboard
+<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
+
+>>> demoboard.resetProject(False)
+
+>>> demoboard
+<DemoBoard as ASICONBOARD, auto-clocking @ 10, project 'tt_um_test'>
+
 ```
 
 

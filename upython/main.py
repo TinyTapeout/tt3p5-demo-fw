@@ -7,14 +7,21 @@ Created on Jan 9, 2024
 import ttboard.util.time as time
 from ttboard.mode import RPMode
 from ttboard.demoboard import DemoBoard
+from ttboard.pins.gpio_map import GPIOMap
 
 # Pin import to provide access in REPL
 # to things like tt.uio3.mode = Pin.OUT
 from ttboard.pins.upython import Pin
 
 tt = None
+startup_with_clock_high = False
 def startup():
-    global tt
+    global tt, startup_with_clock_high
+    
+    # take a look at project clock pin on startup
+    # make note if it was HIGH
+    clkPin = Pin(GPIOMap.RP_PROJCLK, Pin.IN)
+    startup_with_clock_high = clkPin()
     
     # construct DemoBoard
     # either pass an appropriate RPMode, e.g. RPMode.ASIC_ON_BOARD
@@ -63,7 +70,7 @@ def test_design_tnt_counter():
     except KeyboardInterrupt:
         tt.clockProjectPWMStop()
         
-def test_bidirs():
+def test_bidirs(sleepTimeMillis:int=1):
     # select the project from the shuttle
     tt.shuttle.tt_um_test.enable()
     curMode = tt.mode 
@@ -79,7 +86,7 @@ def test_bidirs():
     errCount = 0
     for i in range(0xff):
         tt.bidir_byte = i 
-        time.sleep_ms(1)
+        time.sleep_ms(sleepTimeMillis)
         outbyte = tt.output_byte
         if outbyte !=  i:
             print(f'MISMATCH between bidir val {i} and output {outbyte}')
@@ -92,6 +99,8 @@ def test_bidirs():
         
     # reset everything
     tt.mode = curMode
+    
+    return errCount
             
     
 
@@ -105,6 +114,16 @@ def test_neptune():
     tt.in5.pwm(0) # disable pwm
 
 startup()
-#tt.shuttle.tt_um_test.enable()
+
+# run a test if clock button held high 
+# during startup
+if startup_with_clock_high:
+    print('\n\nDoing startup test!')
+    if test_bidirs():
+        print('ERRORS encountered!')
+    else:
+        print('Startup test GOOD')
+    print('\n\n')
+
 #tt.shuttle.tt_um_psychogenic_neptuneproportional.enable()
 print(tt)

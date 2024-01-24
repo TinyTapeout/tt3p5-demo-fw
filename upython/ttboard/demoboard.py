@@ -237,8 +237,7 @@ class DemoBoard:
             startInReset = self.user_config.default_start_in_reset
             
         if startInReset is not None:
-            if self.mode != RPMode.ASIC_MANUAL_INPUTS:
-                self.resetProject(startInReset)
+            self.resetProject(startInReset)
         
         
         # input byte
@@ -267,7 +266,10 @@ class DemoBoard:
                         else: # nah, want it low
                             bidirs[i](0)
                     
-        if projConfig.has('clock_frequency') and self.mode != RPMode.ASIC_MANUAL_INPUTS:
+        if projConfig.has('clock_frequency'):
+            if self.mode == RPMode.ASIC_MANUAL_INPUTS:
+                log.info('In "manual inputs" mode but clock freq set--setting up for CLK/RST RP ctrl')
+                self.pins.pclockAndResetControlledByRP2040(True)
             self.clockProjectPWM(projConfig.clock_frequency)
         else:
             self.clockProjectPWMStop()

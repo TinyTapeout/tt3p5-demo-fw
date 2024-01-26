@@ -61,7 +61,7 @@ class StandardPin:
     def mode(self, setMode:int):
         self._mode = setMode 
         log.debug(f'Setting pin {self.name} to {self.mode_str}')
-        self.raw_pin.init(setMode)
+        self.raw_pin.init(setMode, pull=self._pull)
         
     @property 
     def mode_str(self):

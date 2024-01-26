@@ -94,6 +94,13 @@ class GPIOMap:
             # 'rp_projclk', -- don't do this during "safe" operation
             'ctrl_ena'
         ]
+    
+    @classmethod
+    def default_pull(cls, pin):
+        if pin in ["nproject_rst", "ctrl_ena"]:
+            return Pin.PULL_UP
+        return Pin.PULL_DOWN
+    
     @classmethod 
     def all(cls):
         retDict = {

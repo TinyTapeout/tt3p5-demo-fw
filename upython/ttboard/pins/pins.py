@@ -227,7 +227,7 @@ class Pins:
         for name,gpio in GPIOMap.all().items():
             if name == self.muxName:
                 continue
-            p = StandardPin(name, gpio, Pin.IN, pull=Pin.PULL_DOWN)
+            p = StandardPin(name, gpio, Pin.IN, pull=GPIOMap.default_pull(name))
             setattr(self, f'pin_{name}', p.raw_pin)
             setattr(self, name, p) # self._pinFunc(p)) 
             self._allpins[name] = p

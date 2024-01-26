@@ -31,7 +31,6 @@ start_in_reset = no
 #  - SAFE: all RP2040 pins inputs
 #  - ASIC_ON_BOARD: TT inputs,nrst and clock driven, outputs monitored
 #  - ASIC_MANUAL_INPUTS: basically same as safe, but intent is clear
-#  - STANDALONE: *no* TT ASIC on-board, testing mode, outputs driven, inputs monitored
 mode = ASIC_ON_BOARD
 
 ```
@@ -153,8 +152,6 @@ tt = DemoBoard(RPMode.ASIC_ON_BOARD) # ASIC drives the inputs (i.e. in0, in1 etc
 # using on-board DIP switches and buttons
 tt = DemoBoard(RPMode.ASIC_MANUAL_INPUTS) # ASIC drives only management pins all else are inputs
 
-# or: no ASIC present -- mostly for testing/advance usage
-tt = DemoBoard(RPMode.STANDALONE) # hm, careful there
 
 ```
 
@@ -246,7 +243,7 @@ System-wide default settings supported are
 
 project: (string) name of project to load on boot, e.g. *tt_um_loopback*
 
-mode: (string) ASIC_ON_BOARD, ASIC_MANUAL_INPUTS (to use the on-board switches/buttons), SAFE and STANDALONE (risky if ASIC on PCB)
+mode: (string) ASIC_ON_BOARD, ASIC_MANUAL_INPUTS (to use the on-board switches/buttons), or SAFE 
 
 start_in_reset: (bool) whether projects should have their nRESET pin held low when enabled
 

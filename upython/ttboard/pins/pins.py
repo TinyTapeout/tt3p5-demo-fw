@@ -28,7 +28,7 @@ TLDR
 @copyright: Copyright (C) 2024 Pat Deegan, https://psychogenic.com
 '''
 
-from ttboard.mode import RPMode
+from ttboard.mode import RPMode, RPModeDEVELOPMENT
 
 
 from ttboard.pins.upython import Pin
@@ -156,7 +156,7 @@ class Pins:
     @mode.setter
     def mode(self, setTo:int):
         startupMap = {
-            RPMode.STANDALONE: self.begin_standalone,
+            RPModeDEVELOPMENT.STANDALONE: self.begin_standalone,
             RPMode.ASIC_ON_BOARD: self.begin_asiconboard,
             RPMode.ASIC_MANUAL_INPUTS: self.begin_asic_manual_inputs,
             RPMode.SAFE: self.begin_safe

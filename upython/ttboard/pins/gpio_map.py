@@ -6,7 +6,7 @@ Created on Jan 23, 2024
 '''
 
 from ttboard.pins.upython import Pin
-from ttboard.mode import RPMode
+from ttboard.mode import RPModeDEVELOPMENT
 class GPIOMap:
     '''
         A place to store 
@@ -79,7 +79,7 @@ class GPIOMap:
             'ncrst': Pin.OUT,
             'cinc': Pin.OUT,
             }
-        if rpmode == RPMode.STANDALONE:
+        if rpmode == RPModeDEVELOPMENT.STANDALONE:
             for k in pinModeMap.keys():
                 if k.startswith('out'):
                     pinModeMap[k] = Pin.OUT

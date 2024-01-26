@@ -11,3 +11,5 @@ if not IsRP2040:
     def sleep_ms(v):
         sleep(v/1000)
 
+    def sleep_us(v):
+        sleep(v/1000000)

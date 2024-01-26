@@ -58,6 +58,9 @@ class DesignIndex:
     @property 
     def all(self):
         return self._shuttle_index.values()
+    
+    def get(self, project_name:str) -> Design:
+        return self._shuttle_index[project_name]
                 
         
 class ProjectMux:
@@ -116,7 +119,11 @@ class ProjectMux:
         return self._design_index
     
     
+    def has(self, project_name:str):
+        return hasattr(self.projects, project_name)
     
+    def get(self, project_name:str) -> Design:
+        return getattr(self.projects, project_name)
     
     def __getattr__(self, name):
         if hasattr(self.projects, name):

@@ -7,6 +7,9 @@ Created on Jan 22, 2024
 from ttboard.config.parser import ConfigParser
 from ttboard.mode import RPMode
 
+import ttboard.logging as logging
+log = logging.getLogger(__name__)
+
 class UserProjectConfig:
     def __init__(self, section:str, conf:ConfigParser):
         self.section = section 
@@ -34,10 +37,14 @@ class UserConfig:
     def __init__(self, iniFile:str='config.ini'):
         self._inifile = iniFile 
         self._config = ConfigParser()
+        self.load(iniFile)
+        
+    def load(self, file:str):
         try:
-            self._config.read(iniFile)
+            self._config.read(file)
+            log.info(f'Loaded config {file}')
         except: # no FileNotFoundError on uPython
-            pass
+            log.warn(f'Could not load config file {file}')
         
     @property 
     def config(self):

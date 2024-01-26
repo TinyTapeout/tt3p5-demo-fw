@@ -93,6 +93,12 @@ class DemoBoard:
         self.shuttle.designEnabledCallback = self.applyUserConfig
         self._clock_pwm = None
         
+        if self.user_config.default_project is not None:
+            if self.shuttle.has(self.user_config.default_project):
+                self.shuttle.get(self.user_config.default_project).enable()
+            else:
+                log.warn(f'Default project is unknown "{self.user_config.default_project}"')
+        
     @property 
     def mode(self):
         return self.pins.mode 

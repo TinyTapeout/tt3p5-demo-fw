@@ -31,7 +31,7 @@ class Pin:
             self.val = setTo 
         return self.val
         
-    def init(self, direction:int):
+    def init(self, direction:int, pull:int=None):
         log.debug(f'Setting GPIO {self.gpio} to direction {direction}')
         self.dir = direction
 

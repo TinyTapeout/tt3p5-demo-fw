@@ -99,6 +99,7 @@ class StandardPin:
         if freq is not None and freq < 1:
             log.info(f'Disabling pwm on {self.name}')
             self.mode = Pin.OUT
+            self._pwm = None
             return
         
         log.debug(f"Setting PWM on {self.name} to {freq}Hz")

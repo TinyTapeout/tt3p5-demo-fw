@@ -201,8 +201,11 @@ class DemoBoard:
         
         self._clock_pwm.deinit()
         self._clock_pwm = None
-    
-    
+        
+        # Set pin back to a normal output
+        self.project_clk.pwm(0)
+
+
     def applyUserConfig(self, design:Design):
         
         log.debug(f'Design "{design.name}" loaded, apply user conf')

@@ -41,34 +41,34 @@ def startup():
     print("\n\n")
 
 def autoClockProject(freqHz:int):
-    tt.clockProjectPWM(freqHz)
+    tt.clock_project_PWM(freqHz)
     
 def stopClocking():
-    tt.clockProjectPWMStop()
+    tt.clock_project_stop()
 
 def test_design_tnt_counter():
     # select the project from the shuttle
     tt.shuttle.tt_um_test.enable()
     
     #reset
-    tt.resetProject(True)
+    tt.reset_project(True)
 
     # enable the internal counter of test design
     tt.in0(1)
 
     # take out of reset
-    tt.resetProject(False)
+    tt.reset_project(False)
     
     print('Running tt_um_test, printing output...Ctrl-C to stop')
     time.sleep_ms(300)
     
-    tt.clockProjectPWM(10)
+    tt.clock_project_PWM(10)
     try:
         while True:
             print(hex(tt.output_byte & 0x0f)) # could do ...out0(), out1() etc
             time.sleep_ms(100)
     except KeyboardInterrupt:
-        tt.clockProjectPWMStop()
+        tt.clock_project_stop()
         
 def test_bidirs(sleepTimeMillis:int=1):
     # select the project from the shuttle
@@ -77,7 +77,7 @@ def test_bidirs(sleepTimeMillis:int=1):
     tt.mode = RPMode.ASIC_ON_BOARD # make sure we're controlling everything
     
     tt.in0(0) # want this low
-    tt.clockProjectPWM(1e3) # clock it real good
+    tt.clock_project_PWM(1e3) # clock it real good
     
     for bp in tt.bidirs:
         bp.mode = Pin.OUT

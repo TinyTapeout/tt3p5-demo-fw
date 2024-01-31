@@ -35,12 +35,12 @@ class MuxControl:
         self.currentValue = defValue
         self._muxedPins = []
         
-    def modeProjectIO(self):
-        self.select(1)
-    def modeAdmin(self):
-        self.select(0)
+    def mode_project_IO(self):
+        self.select_high()
+    def mode_admin(self):
+        self.select_low()
         
-    def addMuxed(self, muxd):
+    def add_muxed(self, muxd):
         self._muxedPins.append(muxd)
         
     def select(self, value:int):
@@ -54,26 +54,26 @@ class MuxControl:
         # as two sides think they're outputs
         # safety
         for mp in self._muxedPins:
-            mp.currentDir = Pin.IN
+            mp.current_dir = Pin.IN
             
         if value:
             log.debug('Mux CTRL selecting HIGH set (proj IO)')
             self.ctrlpin(1)
             for mp in self._muxedPins:
-                pDeets = mp.highPin()
-                mp.currentDir = pDeets.dir
+                pDeets = mp.high_pin
+                mp.current_dir = pDeets.dir
         else:
             log.debug('Mux CTRL selecting LOW set (admin)')
             self.ctrlpin(0)
             for mp in self._muxedPins:
-                pDeets = mp.lowPin()
-                mp.currentDir = pDeets.dir
+                pDeets = mp.low_pin
+                mp.current_dir = pDeets.dir
             
         self.currentValue = value
         
-    def selectHigh(self):
+    def select_high(self):
         self.select(1)
         
-    def selectLow(self):
+    def select_low(self):
         self.select(0)
         

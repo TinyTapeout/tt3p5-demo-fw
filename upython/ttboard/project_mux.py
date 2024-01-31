@@ -82,23 +82,23 @@ class ProjectMux:
         
     def disable(self):
         log.info(f'Disable (selecting project 0)')
-        self.resetAndClockMux(0)
+        self.reset_and_clock_mux(0)
         self.enabled = None
         
     def enable(self, design:Design):
         
         log.info(f'Enable design {design.name}')
-        self.resetAndClockMux(design.count)
+        self.reset_and_clock_mux(design.count)
         self.enabled = design
         if self.designEnabledCallback is not None:
             self.designEnabledCallback(design)
             
     
-    def resetAndClockMux(self, count:int):
+    def reset_and_clock_mux(self, count:int):
         self.p.safe_bidir() # reset bidirectionals to safe mode
         
         # enable admin pins through hw mux
-        self.p.muxCtrl.modeAdmin() 
+        self.p.muxCtrl.mode_admin() 
         
         self.reset()
         # send the number of pulses required
@@ -109,7 +109,7 @@ class ProjectMux:
             time.sleep_ms(1)
         
         self.p.ctrl_ena(1)
-        self.p.muxCtrl.modeProjectIO() 
+        self.p.muxCtrl.mode_project_IO() 
         
     @property
     def projects(self):

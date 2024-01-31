@@ -19,7 +19,7 @@ class ModeBase:
         return modeMap
     
     @classmethod
-    def fromString(cls, s:str):
+    def from_string(cls, s:str):
         modeMap = cls.modemap()
         if s is None or not hasattr(s, 'upper'):
             return None
@@ -39,7 +39,7 @@ class ModeBase:
         }
         return nameMap 
     @classmethod
-    def toString(cls, mode:int):
+    def to_string(cls, mode:int):
         nameMap = cls.namemap()
         if mode in nameMap:
             return nameMap[mode]

@@ -52,7 +52,7 @@ class GPIOMap:
     RPIO29 = 29
     
     @classmethod
-    def muxedPairs(cls):
+    def muxed_pairs(cls):
         mpairnames = [
             'sdi_out0',
             'sdo_out1',
@@ -67,7 +67,7 @@ class GPIOMap:
     
     
     @classmethod 
-    def muxedPinModeMap(cls, rpmode:int):
+    def muxed_pinmode_map(cls, rpmode:int):
         
         pinModeMap = {
             'out0': Pin.IN,

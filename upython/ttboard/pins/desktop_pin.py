@@ -34,6 +34,12 @@ class Pin:
     def init(self, direction:int, pull:int=None):
         log.debug(f'Setting GPIO {self.gpio} to direction {direction}')
         self.dir = direction
+        
+    def toggle(self):
+        if self.val:
+            self.val = 0
+        else:
+            self.val = 1
 
     def __call__(self, value:int=None):
         if value is not None:

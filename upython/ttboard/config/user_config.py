@@ -56,7 +56,7 @@ class UserConfig:
             return None 
         
         modeStr = self.config.get('DEFAULT', 'mode')
-        return RPMode.fromString(modeStr)
+        return RPMode.from_string(modeStr)
         
     @property
     def default_project(self):

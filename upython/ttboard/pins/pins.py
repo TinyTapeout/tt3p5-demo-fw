@@ -166,7 +166,7 @@ class Pins:
             setTo = RPMode.SAFE 
         
         self._mode = setTo
-        log.info(f'Setting mode to {RPMode.toString(setTo)}')
+        log.info(f'Setting mode to {RPMode.to_string(setTo)}')
         beginFunc = startupMap[setTo]
         beginFunc()
         
@@ -258,7 +258,7 @@ class Pins:
         log.debug('begin: ASIC_ON_BOARD')
         self.begin_inputs_all()
         self._begin_alwaysOut()
-        self.pclockAndResetControlledByRP2040(True)
+        self.proj_clk_nrst_driven_by_RP2040(True)
         for pname in GPIOMap.all().keys():
             if pname.startswith('in'):
                 p = getattr(self, pname)
@@ -274,7 +274,7 @@ class Pins:
         self.begin_inputs_all()
         self._begin_alwaysOut()
         # leave clk and reset as inputs, for manual operation
-        self.pclockAndResetControlledByRP2040(False)
+        self.proj_clk_nrst_driven_by_RP2040(False)
         # leave in* as inputs
         self._begin_muxPins()
         
@@ -284,7 +284,7 @@ class Pins:
         log.debug('begin: STANDALONE')
         self.begin_inputs_all()
         self._begin_alwaysOut()
-        self.pclockAndResetControlledByRP2040(True)
+        self.proj_clk_nrst_driven_by_RP2040(True)
         
         for pname in GPIOMap.all().keys():
             if pname.startswith('out'):
@@ -297,7 +297,7 @@ class Pins:
                 
         self._begin_muxPins()
         
-    def pclockAndResetControlledByRP2040(self, rpControlled:bool):
+    def proj_clk_nrst_driven_by_RP2040(self, rpControlled:bool):
     
         for pname in ['nproject_rst', 'rp_projclk']:
             p = getattr(self, pname)
@@ -312,8 +312,8 @@ class Pins:
             p.mode = Pin.OUT 
             
     def _begin_muxPins(self):
-        muxedPins = GPIOMap.muxedPairs()
-        modeMap = GPIOMap.muxedPinModeMap(self.mode)
+        muxedPins = GPIOMap.muxed_pairs()
+        modeMap = GPIOMap.muxed_pinmode_map(self.mode)
         for pname, muxPair in muxedPins.items():
             mp = MuxedPin(pname, self.muxCtrl, 
                           getattr(self, pname),
@@ -322,7 +322,7 @@ class Pins:
                           MuxedPinInfo(muxPair[1],
                                        1, modeMap[muxPair[1]])
                           )
-            self.muxCtrl.addMuxed(mp)
+            self.muxCtrl.add_muxed(mp)
             self._allpins[pname] = mp
             setattr(self, muxPair[0], getattr(mp, muxPair[0]))
             setattr(self, muxPair[1], getattr(mp, muxPair[1]))
@@ -337,7 +337,7 @@ class Pins:
     def _dumpPin(self, p:StandardPin):
         print(f'  {p.name} {p.mode_str} {p()}') 
     def dump(self):
-        print(f'Pins configured in mode {RPMode.toString(self.mode)}')
+        print(f'Pins configured in mode {RPMode.to_string(self.mode)}')
         print(f'Currently:')
         for pname in sorted(GPIOMap.all().keys()):
             self._dumpPin(getattr(self, pname))
@@ -370,14 +370,4 @@ class Pins:
                 pinList[i](1)
             else:
                 pinList[i](0)
-    
-    
-    def _pinFunc(self, p:Pin):
-        def getsetter(value:int=None):
-            if value is not None:
-                p.value(value)
-            
-            return p.value()
-        
-        return getsetter
     

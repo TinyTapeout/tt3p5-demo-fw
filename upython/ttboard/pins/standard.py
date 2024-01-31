@@ -50,7 +50,7 @@ class StandardPin:
         return self._name
     
     @property 
-    def isInput(self):
+    def is_input(self):
         return self._mode == Pin.IN
     
     @property 
@@ -66,7 +66,7 @@ class StandardPin:
     @property 
     def mode_str(self):
         modestr = 'OUT'
-        if self.isInput:
+        if self.is_input:
             modestr = 'IN'
         return modestr
     @property 
@@ -92,7 +92,7 @@ class StandardPin:
         return self._gpio_num
     
     def pwm(self, freq:int=None, duty_u16:int=0xffff/2):
-        if self.isInput:
+        if self.is_input:
             log.error(f'Trying to twiddle PWM on pin {self.name} that is an input')
             return 
         
@@ -132,8 +132,15 @@ class StandardPin:
         raise AttributeError
     
     def __repr__(self):
-        return f'<StandardPin {self.name} {self.gpio_num} {self.mode_str}>'
+        outval = ''
+        if not self.is_input:
+            outval = f' {self.raw_pin.value()}'
+        return f'<StandardPin {self.name} GP{self.gpio_num} {self.mode_str}{outval}>'
+        
     
     def __str__(self):
-        return f'Standard pin {self.name} (GPIO {self.gpio_num}), configured as {self.mode_str}'
+        outval = ''
+        if not self.is_input:
+            outval = f' {self.raw_pin.value()}'
+        return f'Standard pin {self.name} (GPIO {self.gpio_num}), configured as {self.mode_str}{outval}'
     

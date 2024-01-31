@@ -73,7 +73,7 @@ tt.in7(1)
 tt.input_byte = 0xAA
 
 # start automatic project clocking
-tt.clockProjectPWM(2e6) # clocking projects @ 2MHz
+tt.clock_project_PWM(2e6) # clocking projects @ 2MHz
 
 
 # observe some outputs
@@ -205,7 +205,7 @@ The currently enabled project, if any, is accessible in
 >>> tt
 <DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test' (in RESET)>
 
->>> tt.resetProject(False)
+>>> tt.reset_project(False)
 
 >>> tt
 <DemoBoard as ASIC_ON_BOARD, auto-clocking @ 10, project 'tt_um_test'>
@@ -416,9 +416,9 @@ You may do everything manually, if desired, using the pins.  Some useful utility
 
 ```
 
-# resetProject: make it clear
-tt.resetProject(True) # held in reset
-tt.resetProject(False) # not in reset
+# reset_project: make it clear
+tt.reset_project(True) # held in reset
+tt.reset_project(False) # not in reset
 
 
 # under normal operation, the project clock is 
@@ -427,9 +427,9 @@ tt.resetProject(False) # not in reset
 <StandardPin rp_projclk 0 OUT>
 
 
-# clockProjectPWM: enough bit-banging already
+# clock_project_PWM: enough bit-banging already
 # auto PWM the project_clk
-tt.clockProjectPWM(500e3) # clock at 500kHz
+tt.clock_project_PWM(500e3) # clock at 500kHz
 
 Since it's PWMed, we now have direct access to that
 >>> tt.project_clk
@@ -440,9 +440,9 @@ Since it's PWMed, we now have direct access to that
 
 
 # later
-tt.clockProjectPWMStop() # ok, stop that
+tt.clock_project_stop() # ok, stop that
 # or
-tt.clockProjectPWM(0) # stops it
+tt.clock_project_PWM(0) # stops it
 
 # back to normal output
 >>> tt.project_clk

@@ -21,6 +21,34 @@ class MuxedPinInfo:
         self.select = muxSelect
         self.dir = direction 
         
+        
+class MuxedSelection:
+    def __init__(self, parent_pin, pInfo:MuxedPinInfo):
+        self._parent = parent_pin 
+        self.info = pInfo 
+    
+    @property 
+    def name(self):
+        return self.info.name
+    
+    @property 
+    def direction(self):
+        return self.info.dir
+     
+    @property
+    def info_string(self):
+        direction = 'OUT'
+        if self.direction == Pin.IN:
+            direction = 'IN'
+        return f'{self.info.name}[{direction}]'
+    
+    def __call__(self, value:int=None):
+        self._parent.select_pin(self.info)
+        return self._parent(value)
+       
+    def __repr__(self):
+        return f'<MuxedSelection {self.info_string} of {self._parent.name}>'
+    
 class MuxedPin(StandardPin):
     '''
         A GPIO that actually maps to two logical pins,
@@ -38,58 +66,49 @@ class MuxedPin(StandardPin):
             gpio:int, pinL:MuxedPinInfo, pinH:MuxedPinInfo):
         super().__init__(name, gpio, pinH.dir)
         self.ctrl = muxCtrl
-        self._currentDir = None
+        self._current_dir = None
         
-        self._muxHighPin = pinH 
-        self._muxLowPin = pinL 
-        
-        setattr(self, self._muxHighPin.name, 
-                self._pinFunc(self._muxHighPin))
+        #self._muxHighPin = pinH 
+        #self._muxLowPin = pinL 
+        self._sel_high = MuxedSelection(self, pinH)
+        self._sel_low = MuxedSelection(self, pinL)
+        setattr(self, self._sel_high.name, self._sel_high)
+        #setattr(self, self._muxHighPin.name, 
+        #        self._pinFunc(self._muxHighPin))
 
-        setattr(self, self._muxLowPin.name, self._pinFunc(self._muxLowPin))
         
+        setattr(self, self._sel_low.name, self._sel_low)
+        #setattr(self, self._muxLowPin.name, self._pinFunc(self._muxLowPin))
         
-    def highPin(self) -> MuxedPinInfo:
-        return self._muxHighPin
+    @property
+    def high_pin(self) -> MuxedPinInfo:
+        return self._sel_high.info
     
-    def lowPin(self) -> MuxedPinInfo:
-        return self._muxLowPin
+    @property
+    def low_pin(self) -> MuxedPinInfo:
+        return self._sel_low.info
     
     @property 
-    def currentDir(self):
-        return self._currentDir
+    def current_dir(self):
+        return self._current_dir
     
-    @currentDir.setter 
-    def currentDir(self, setTo):
-        if self._currentDir == setTo:
+    @current_dir.setter 
+    def current_dir(self, setTo):
+        if self._current_dir == setTo:
             return 
-        self._currentDir = setTo 
+        self._current_dir = setTo 
         self.mode = setTo
         
         log.debug(f'Set dir to {self.mode_str}')
         
-    def selectPin(self, pInfo:MuxedPinInfo):
+    def select_pin(self, pInfo:MuxedPinInfo):
         self.ctrl.select(pInfo.select)
-        self.currentDir = pInfo.dir 
+        self.current_dir = pInfo.dir 
         
-    def _pinFunc(self, pInfo:MuxedPinInfo):
-        def getsetter(value:int=None):
-            self.selectPin(pInfo)
-            if value is not None:
-                return self.raw_pin.value(value)
-            
-            return self.raw_pin.value()
-        
-        return getsetter
     
-    def _muxedChildStr(self, mpi:MuxedPinInfo):
-        direction = 'OUT'
-        if mpi.dir == Pin.IN:
-            direction = 'IN'
-        return f'{mpi.name}[{direction}]'
     
     def __repr__(self):
-        return f'<MuxedPin {self.name} {self.gpio_num} ({self.mode_str}) {self._muxedChildStr(self._muxHighPin)}/{self._muxedChildStr(self._muxLowPin)}>'
+        return f'<MuxedPin {self.name} {self.gpio_num} ({self.mode_str}) {self._sel_low.info_string}/{self._sel_high.info_string}>'
     
     def __str__(self):
-        return f'MuxedPin {self.name} {self.gpio_num} (now as {self.mode_str}) {self._muxedChildStr(self._muxHighPin)}/{self._muxedChildStr(self._muxLowPin)}'
+        return f'MuxedPin {self.name} {self.gpio_num} (now as {self.mode_str}) {self._sel_low.info_string}/{self._sel_high.info_string}'
